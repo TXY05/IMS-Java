@@ -14,6 +14,10 @@ public class Product extends Item {
         return sellPrice;
     }
 
+    public double setSellPrice() {
+        return sellPrice;
+    }
+
     public int getMaxLV() {
         return maxLV;
     }
@@ -21,5 +25,11 @@ public class Product extends Item {
     public int getMinLV() {
         return minLV;
     }
+
+    public boolean isInStock() {
+        return getItemQuantity() > 0;
+    }
+
 }
+
 
