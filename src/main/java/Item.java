@@ -1,3 +1,4 @@
+import java.io.*;
 import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.HashMap;
@@ -31,19 +32,27 @@ public class Item {
         return itemQuantity;
     }
 
+    public String getItemId() {
+        return itemId;
+    }
+
+    public ItemGroups getItemGroup() {
+        return itemGroup;
+    }
+
     public void addItemQuantity(int quantityToAdd) {
-        if (inventory.containsKey(this.itemId)) {
-            Item item = inventory.get(this.itemId);
+        if (getInventory().containsKey(this.itemId)) {
+            Item item = getInventory().get(this.itemId);
             item.itemQuantity += quantityToAdd;
         } else {
             this.itemQuantity += quantityToAdd;
-            inventory.put(this.itemId, this);
+            getInventory().put(this.itemId, this);
         }
     }
 
     public void removeItemQuantity(int quantityToRemove) {
-        if (inventory.containsKey(this.itemId)) {
-            Item item = inventory.get(this.itemId);
+        if (getInventory().containsKey(this.itemId)) {
+            Item item = getInventory().get(this.itemId);
             if (item.itemQuantity >= quantityToRemove) {
                 item.itemQuantity -= quantityToRemove;
             } else {
@@ -61,19 +70,53 @@ public class Item {
     }
 
     private void addItemToInventory(Item item) {
-        inventory.put(item.itemId, item);
+        getInventory().put(item.itemId, item);
     }
 
     public static Map<String, Item> getInventory() {
         return inventory;
     }
 
+    public static void saveInventoryToFile() {
+        String fileName = "items.txt";
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
+            for (Item item : getInventory().values()) {
+                writer.write(item.getItemId() + "," + item.getItemName() + "," + item.getItemQuantity() + "," + item.getItemGroup().getGroupName());
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void loadInventoryFromFile() {
+        String fileName = "items.txt";
+        try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts.length == 4) {
+                    String itemId = parts[0];
+                    String itemName = parts[1];
+                    int itemQuantity = Integer.parseInt(parts[2]);
+                    String groupName = parts[3];
+                    ItemGroups itemGroup = new ItemGroups(groupName);
+                    Item item = new Item(itemName, itemQuantity, itemGroup);
+                    getInventory().put(itemId, item);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public static void promptUserToAddItemQuantity() {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Enter the item ID to add quantity:");
         String itemId = scanner.nextLine();
-        if (inventory.containsKey(itemId)) {
-            Item item = inventory.get(itemId);
+
+        if (getInventory().containsKey(itemId)) {
+            Item item = getInventory().get(itemId);
             System.out.println("Enter the quantity to add for item " + item.getItemName() + ":");
             int quantityToAdd = scanner.nextInt();
             item.addItemQuantity(quantityToAdd);
@@ -87,8 +130,9 @@ public class Item {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Enter the item ID to remove quantity:");
         String itemId = scanner.nextLine();
-        if (inventory.containsKey(itemId)) {
-            Item item = inventory.get(itemId);
+
+        if (getInventory().containsKey(itemId)) {
+            Item item = getInventory().get(itemId);
             System.out.println("Enter the quantity to remove for item " + item.getItemName() + ":");
             int quantityToRemove = scanner.nextInt();
             item.removeItemQuantity(quantityToRemove);
@@ -103,8 +147,8 @@ public class Item {
         System.out.println("Enter the item ID to edit:");
         String itemId = scanner.nextLine();
 
-        if (inventory.containsKey(itemId)) {
-            Item item = inventory.get(itemId);
+        if (getInventory().containsKey(itemId)) {
+            Item item = getInventory().get(itemId);
             System.out.println("Enter the new name for item " + item.getItemName() + ":");
             String newItemName = scanner.nextLine();
             System.out.println("Enter the new quantity for item " + item.getItemName() + ":");
@@ -122,8 +166,8 @@ public class Item {
 
     public static void displayInventory() {
         System.out.println("\nCurrent Inventory:");
-        for (Item item : inventory.values()) {
-            System.out.println("ID: " + item.generateItemId() + ", Name: " + item.getItemName() + ", Quantity: " + item.getItemQuantity());
+        for (Item item : getInventory().values()) {
+            System.out.println("ID: " + item.getItemId() + ", Name: " + item.getItemName() + ", Quantity: " + item.getItemQuantity());
         }
     }
 
@@ -131,14 +175,8 @@ public class Item {
         Scanner scanner = new Scanner(System.in);
         boolean exit = false;
 
-        // Create an item group
-        ItemGroups electronicsGroup = new ItemGroups("Electronics");
-
-        // Create an item
-        Item laptop = new Item("Laptop", 10, electronicsGroup);
-
-        // Add the item to the group
-        electronicsGroup.addItemGroup(laptop);
+        // Load inventory from file at the start
+        loadInventoryFromFile();
 
         while (!exit) {
             System.out.println("\nInventory Management System");
@@ -165,6 +203,8 @@ public class Item {
                     displayInventory();
                     break;
                 case 5:
+                    // Save inventory to file before exiting
+                    saveInventoryToFile();
                     exit = true;
                     break;
                 default:
