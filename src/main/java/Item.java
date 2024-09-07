@@ -16,6 +16,10 @@ public class Item {
     private int maxInvLV;
     private int minInvLV;
 
+    public static void main(String[] args) {
+        manageInventory();
+    }
+
     // Constructors
     public Item(String itemName, int itemQuantity, ItemGroups itemGroup) {
         this.itemName = itemName;
