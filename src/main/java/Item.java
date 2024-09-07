@@ -1,8 +1,8 @@
 import java.io.*;
 import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 public class Item {
     private static final AtomicInteger idCounter = new AtomicInteger(0);
@@ -10,8 +10,13 @@ public class Item {
     private int itemQuantity;
     private ItemGroups itemGroup;  // Association with ItemGroups
     private final String itemId;
-    private static final Map<String, Item> inventory = new HashMap<>();
+    private static final Map<String, Item> inventory = new TreeMap<>();
 
+    private double buyPrice;
+    private int maxInvLV;
+    private int minInvLV;
+
+    // Constructors
     public Item(String itemName, int itemQuantity, ItemGroups itemGroup) {
         this.itemName = itemName;
         this.itemQuantity = itemQuantity;
@@ -20,10 +25,14 @@ public class Item {
         addItemToInventory(this);
     }
 
-    public String generateItemId() {
-        return String.format("P%04d", idCounter.incrementAndGet());
+    public Item(String name, int quantity, ItemGroups groupName, double buyPrice, int maxInvLV, int minInvLV) {
+        this(name, quantity, groupName);
+        this.buyPrice = buyPrice;
+        this.maxInvLV = maxInvLV;
+        this.minInvLV = minInvLV;
     }
 
+    // Getters and Setters
     public String getItemName() {
         return itemName;
     }
@@ -40,6 +49,27 @@ public class Item {
         return itemGroup;
     }
 
+    public double getBuyPrice() {
+        return buyPrice;
+    }
+
+    public void setBuyPrice(double buyPrice) {
+        this.buyPrice = buyPrice;
+    }
+
+    public int getMaxInvLV() {
+        return maxInvLV;
+    }
+
+    public int getMinInvLV() {
+        return minInvLV;
+    }
+
+    public boolean isInStock() {
+        return getItemQuantity() > 0;
+    }
+
+    // Inventory Management Methods
     public void addItemQuantity(int quantityToAdd) {
         if (getInventory().containsKey(this.itemId)) {
             Item item = getInventory().get(this.itemId);
@@ -67,12 +97,10 @@ public class Item {
         this.itemName = newItemName;
         this.itemQuantity = newItemQuantity;
         this.itemGroup = newItemGroup;
+        saveInventoryToFile();  // Save changes to file
     }
 
-    private void addItemToInventory(Item item) {
-        getInventory().put(item.itemId, item);
-    }
-
+    // Static Methods
     public static Map<String, Item> getInventory() {
         return inventory;
     }
@@ -110,33 +138,18 @@ public class Item {
         }
     }
 
-    public static void promptUserToAddItemQuantity() {
+    public static void promptUserToEditItemQuantity() {
         Scanner scanner = new Scanner(System.in);
-        System.out.println("Enter the item ID to add quantity:");
+        System.out.println("Enter the item ID:");
         String itemId = scanner.nextLine();
 
         if (getInventory().containsKey(itemId)) {
             Item item = getInventory().get(itemId);
-            System.out.println("Enter the quantity to add for item " + item.getItemName() + ":");
-            int quantityToAdd = scanner.nextInt();
-            item.addItemQuantity(quantityToAdd);
+            System.out.println("Enter the new quantity for item " + item.getItemName() + ":");
+            int newQuantity = scanner.nextInt();
+            item.itemQuantity = newQuantity;
             System.out.println("New quantity of " + item.getItemName() + ": " + item.getItemQuantity());
-        } else {
-            System.out.println("Item ID not found in inventory.");
-        }
-    }
-
-    public static void promptUserToRemoveItemQuantity() {
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("Enter the item ID to remove quantity:");
-        String itemId = scanner.nextLine();
-
-        if (getInventory().containsKey(itemId)) {
-            Item item = getInventory().get(itemId);
-            System.out.println("Enter the quantity to remove for item " + item.getItemName() + ":");
-            int quantityToRemove = scanner.nextInt();
-            item.removeItemQuantity(quantityToRemove);
-            System.out.println("New quantity of " + item.getItemName() + ": " + item.getItemQuantity());
+            saveInventoryToFile();  // Save changes to file
         } else {
             System.out.println("Item ID not found in inventory.");
         }
@@ -167,7 +180,7 @@ public class Item {
     public static void displayInventory() {
         System.out.println("\nCurrent Inventory:");
         for (Item item : getInventory().values()) {
-            System.out.println("ID: " + item.getItemId() + ", Name: " + item.getItemName() + ", Quantity: " + item.getItemQuantity());
+            System.out.println("ID: " + item.getItemId() + ", Name: " + item.getItemName() + ", Quantity: " + item.getItemQuantity() + ", Category: " + item.getItemGroup().getGroupName());
         }
     }
 
@@ -180,29 +193,25 @@ public class Item {
 
         while (!exit) {
             System.out.println("\nInventory Management System");
-            System.out.println("1. Add Item Quantity");
-            System.out.println("2. Remove Item Quantity");
-            System.out.println("3. Edit Item Details");
-            System.out.println("4. Display Inventory");
-            System.out.println("5. Exit");
+            System.out.println("1. Edit Item Quantity");
+            System.out.println("2. Edit Item Details");
+            System.out.println("3. Display Inventory");
+            System.out.println("4. Exit");
             System.out.print("Choose an option: ");
             int choice = scanner.nextInt();
             scanner.nextLine();  // Consume newline
 
             switch (choice) {
                 case 1:
-                    promptUserToAddItemQuantity();
+                    promptUserToEditItemQuantity();
                     break;
                 case 2:
-                    promptUserToRemoveItemQuantity();
-                    break;
-                case 3:
                     promptUserToEditItemDetails();
                     break;
-                case 4:
+                case 3:
                     displayInventory();
                     break;
-                case 5:
+                case 4:
                     // Save inventory to file before exiting
                     saveInventoryToFile();
                     exit = true;
@@ -212,5 +221,14 @@ public class Item {
             }
         }
         scanner.close();
+    }
+
+    // Utility Methods
+    public String generateItemId() {
+        return String.format("P%04d", idCounter.incrementAndGet());
+    }
+
+    private void addItemToInventory(Item item) {
+        getInventory().put(item.itemId, item);
     }
 }

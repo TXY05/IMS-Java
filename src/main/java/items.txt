@@ -1,3 +1,0 @@
-P0001,Apple,50,Fruits
-P0002,Banana,30,Fruits
-P0003,Carrot,20,Vegetables
