@@ -73,7 +73,7 @@ public class Item {
         return getItemQuantity() > 0;
     }
 
-    // Inventory Management Methods
+    // Methods
     public void addItemQuantity(int quantityToAdd) {
         if (getInventory().containsKey(this.itemId)) {
             Item item = getInventory().get(this.itemId);
@@ -150,8 +150,7 @@ public class Item {
         if (getInventory().containsKey(itemId)) {
             Item item = getInventory().get(itemId);
             System.out.println("Enter the new quantity for item " + item.getItemName() + ":");
-            int newQuantity = scanner.nextInt();
-            item.itemQuantity = newQuantity;
+            item.itemQuantity = scanner.nextInt();
             System.out.println("New quantity of " + item.getItemName() + ": " + item.getItemQuantity());
             saveInventoryToFile();  // Save changes to file
         } else {
@@ -216,8 +215,7 @@ public class Item {
                     displayInventory();
                     break;
                 case 4:
-                    // Save inventory to file before exiting
-                    saveInventoryToFile();
+                    saveInventoryToFile(); // Save inventory to file before exiting
                     exit = true;
                     break;
                 default:
@@ -227,7 +225,6 @@ public class Item {
         scanner.close();
     }
 
-    // Utility Methods
     public String generateItemId() {
         return String.format("P%04d", idCounter.incrementAndGet());
     }
