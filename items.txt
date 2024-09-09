@@ -1,3 +1,6 @@
 P0001,Apple,30,Fruits
 P0002,Banana,30,Fruits
 P0003,Carrot,20,Vegetables
+P0004,Orange,50,Fruits
+P0005,Laptop,20,Electronics
+P0006,PC,20,Electronics

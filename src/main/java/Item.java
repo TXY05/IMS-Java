@@ -3,6 +3,10 @@ import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.ArrayList;
 
 public class Item {
     private static final AtomicInteger idCounter = new AtomicInteger(0);
@@ -144,12 +148,12 @@ public class Item {
 
     public static void promptUserToEditItemQuantity() {
         Scanner scanner = new Scanner(System.in);
-        System.out.println("Enter the item ID:");
+        System.out.print("\nEnter the item ID: ");
         String itemId = scanner.nextLine();
 
         if (getInventory().containsKey(itemId)) {
             Item item = getInventory().get(itemId);
-            System.out.println("Enter the new quantity for item " + item.getItemName() + ":");
+            System.out.print("Enter the new quantity for item " + item.getItemName() + ": ");
             item.itemQuantity = scanner.nextInt();
             System.out.println("New quantity of " + item.getItemName() + ": " + item.getItemQuantity());
             saveInventoryToFile();  // Save changes to file
@@ -160,17 +164,17 @@ public class Item {
 
     public static void promptUserToEditItemDetails() {
         Scanner scanner = new Scanner(System.in);
-        System.out.println("Enter the item ID to edit:");
+        System.out.print("\nEnter the item ID to edit: ");
         String itemId = scanner.nextLine();
 
         if (getInventory().containsKey(itemId)) {
             Item item = getInventory().get(itemId);
-            System.out.println("Enter the new name for item " + item.getItemName() + ":");
+            System.out.print("Enter the new name for item " + item.getItemName() + ": ");
             String newItemName = scanner.nextLine();
-            System.out.println("Enter the new quantity for item " + item.getItemName() + ":");
+            System.out.print("Enter the new quantity for item " + item.getItemName() + ": ");
             int newItemQuantity = scanner.nextInt();
             scanner.nextLine();  // Consume newline
-            System.out.println("Enter the new group name for item " + item.getItemName() + ":");
+            System.out.print("Enter the new group name for item " + item.getItemName() + ": ");
             String newItemGroupName = scanner.nextLine();
             ItemGroups newItemGroup = new ItemGroups(newItemGroupName);
             item.editItemDetails(newItemName, newItemQuantity, newItemGroup);
@@ -178,6 +182,62 @@ public class Item {
         } else {
             System.out.println("Item ID not found in inventory.");
         }
+    }
+
+    public static void promptUserToAddNewItem() {
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.print("\nEnter the item name: ");
+        String itemName = scanner.nextLine();
+
+        System.out.print("Enter the item quantity: ");
+        int itemQuantity = scanner.nextInt();
+        scanner.nextLine();  // Consume newline
+
+        // Display existing item groups
+        System.out.println("Existing item groups:");
+        List<ItemGroups> existingGroups = getExistingItemGroups();
+        for (int i = 0; i < existingGroups.size(); i++) {
+            System.out.println((i + 1) + ". " + existingGroups.get(i).getGroupName());
+        }
+        System.out.println((existingGroups.size() + 1) + ". Create new group");
+
+        System.out.print("Choose an option: ");
+        int groupChoice = scanner.nextInt();
+        scanner.nextLine();  // Consume newline
+
+        ItemGroups itemGroup;
+        if (groupChoice > 0 && groupChoice <= existingGroups.size()) {
+            itemGroup = existingGroups.get(groupChoice - 1);
+        } else {
+            System.out.print("Enter the new group name: ");
+            String groupName = scanner.nextLine();
+            itemGroup = new ItemGroups(groupName);
+            existingGroups.add(itemGroup);
+        }
+
+        // Create a new Item object
+        Item newItem = new Item(itemName, itemQuantity, itemGroup);
+
+        // Add the new item to the inventory
+        getInventory().put(newItem.getItemId(), newItem);
+
+        // Save the updated inventory to the file
+        saveInventoryToFile();
+
+        System.out.println("New item added successfully.");
+    }
+
+    public static List<ItemGroups> getExistingItemGroups() {
+        // Collect all unique item groups from the inventory
+        Set<String> groupNamesSet = new HashSet<>();
+        List<ItemGroups> uniqueGroups = new ArrayList<>();
+        for (Item item : getInventory().values()) {
+            if (groupNamesSet.add(item.getItemGroup().getGroupName())) {
+                uniqueGroups.add(item.getItemGroup());
+            }
+        }
+        return uniqueGroups;
     }
 
     public static void displayInventory() {
@@ -196,25 +256,29 @@ public class Item {
 
         while (!exit) {
             System.out.println("\nInventory Management System");
-            System.out.println("1. Edit Item Quantity");
-            System.out.println("2. Edit Item Details");
-            System.out.println("3. Display Inventory");
-            System.out.println("4. Exit");
+            System.out.println("1. Add New Item");
+            System.out.println("2. Edit Item Quantity");
+            System.out.println("3. Edit Item Details");
+            System.out.println("4. Display Inventory");
+            System.out.println("5. Exit");
             System.out.print("Choose an option: ");
             int choice = scanner.nextInt();
-            scanner.nextLine();  // Consume newline
+            scanner.nextLine();
 
             switch (choice) {
                 case 1:
-                    promptUserToEditItemQuantity();
+                    promptUserToAddNewItem();
                     break;
                 case 2:
-                    promptUserToEditItemDetails();
+                    promptUserToEditItemQuantity();
                     break;
                 case 3:
-                    displayInventory();
+                    promptUserToEditItemDetails();
                     break;
                 case 4:
+                    displayInventory();
+                    break;
+                case 5:
                     saveInventoryToFile(); // Save inventory to file before exiting
                     exit = true;
                     break;
