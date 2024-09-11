@@ -1,21 +1,44 @@
-public class OrderItem extends Item {
-    private int orderQuantity;
+package assignment;
 
-    public OrderItem(String itemName, int itemQuantity, ItemGroups itemGroup, int orderQuantity) {
-        super(itemName, itemQuantity, itemGroup);
-        this.orderQuantity = orderQuantity;
+/**
+ *
+ * @author User
+ */
+import java.io.*;
+import java.util.*;
+
+public class OrderItem {
+    private Item items;
+    private String itemName;
+    private int quantity;
+    private double totalPrice;
+    
+    public OrderItem(Item items, int quantity){
+        this.items = items;
+        this.quantity = quantity;
+        this.totalPrice = getTotalPrice(items, quantity);
     }
-
-    public OrderItem(String name, int quantity, ItemGroups groupName, double buyPrice, int maxInvLV, int minInvLV, int orderQuantity) {
-        super(name, quantity, groupName, buyPrice, maxInvLV, minInvLV);
-        this.orderQuantity = orderQuantity;
+    
+    public OrderItem(String name, int quantity, double totalPrice){
+        this.itemName = name;
+        this.quantity = quantity;
+        this.totalPrice = totalPrice;
     }
-
-    public int getOrderQuantity() {
-        return orderQuantity;
+    
+    public Item getItem(){
+        return items;
     }
-
-    public void setOrderQuantity(int orderQuantity) {
-        this.orderQuantity = orderQuantity;
+    
+    public int getQuantity(){
+        return quantity;
+    }
+    
+    public double getTotalPrice(){
+        return totalPrice;
+    }
+    
+    public double getTotalPrice(Item items, int quantity){
+        double tot = items.getBuyPrice() * quantity; 
+        return tot;
     }
 }
