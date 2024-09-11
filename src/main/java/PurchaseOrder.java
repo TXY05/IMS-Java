@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package assignment;
 
 /**
@@ -302,18 +298,14 @@ public class PurchaseOrder {
             PurchaseOrder po = new PurchaseOrder(poID, orderList, suppName, date, status, totalPrice, itemCount);
             poList.add(po);
             }
-            } catch (IOException e) {
+    
+        } catch (FileNotFoundException e){
+            System.out.println("File Not Found !!!");
+        } catch (IOException e) {
             e.printStackTrace();
-            System.out.println("Unable to Open File !!!");
+            System.out.println("Something Went Wrong !!!");
             System.exit(1);
         }
-//        } catch (FileNotFoundException e){
-//            
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//            System.out.println("Unable to Open File !!!");
-//            System.exit(1);
-//        }
         return poList;
     }
     
