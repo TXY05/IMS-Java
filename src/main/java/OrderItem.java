@@ -5,19 +5,22 @@ public class OrderItem {
     private Item items;
     private String ordItemName;
     private int quantity;
+    private double unitPrice;
     private double totalPrice;
     
     // for saving
-    public OrderItem(Item items, int quantity){
+    public OrderItem(Item items, int quantity, double unitPrice){
         this.items = items;
         this.quantity = quantity;
-        this.totalPrice = getTotalPrice(items, quantity);
+        this.unitPrice = unitPrice;
+        this.totalPrice = getTotalPrice(unitPrice, quantity);
     }
     
     // for reading
-    public OrderItem(String name, int quantity, double totalPrice){
+    public OrderItem(String name, int quantity, double unitPrice, double totalPrice){
         this.ordItemName = name;
         this.quantity = quantity;
+        this.unitPrice = unitPrice;
         this.totalPrice = totalPrice;
     }
     
@@ -32,13 +35,17 @@ public class OrderItem {
     public int getQuantity(){
         return quantity;
     }
+
+    public double getUnitPrice() {
+        return unitPrice;
+    }
     
     public double getTotalPrice(){
         return totalPrice;
     }
     
-    public double getTotalPrice(Item items, int quantity){
-        double tot = items.getBuyPrice() * quantity; 
+    public double getTotalPrice(double unitPrice, int quantity){
+        double tot = unitPrice * quantity; 
         return tot;
     }
 }
