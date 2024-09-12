@@ -1,6 +1,6 @@
-P0001,Apple,30,Fruits
-P0002,Banana,30,Fruits
-P0003,Carrot,20,Vegetables
-P0004,Orange,50,Fruits
-P0005,Laptop,20,Electronics
-P0006,PC,20,Electronics
+P0001,Apple,30,1.2,Fruits
+P0002,Banana,30,1.5,Fruits
+P0003,Carrot,20,1.8,Vegetables
+P0004,Orange,50,1.6,Fruits
+P0005,Laptop,20,2.0,Electronics
+P0006,PC,20,2.5,Electronics
