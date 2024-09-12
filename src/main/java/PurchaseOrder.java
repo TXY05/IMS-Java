@@ -1,9 +1,3 @@
-package assignment;
-
-/**
- *
- * @author User
- */
 import java.io.*;
 import java.time.LocalDate;
 import java.util.*;
@@ -177,98 +171,127 @@ public class PurchaseOrder {
     
     public static ArrayList<OrderItem> addOrdItems(){
         Scanner sc = new Scanner(System.in);
-        ArrayList<Item> ListItems = listItemFromFile("Item.txt");
-        ArrayList<OrderItem> ordList = new ArrayList<>();
-        char done = 'Y';
+        ArrayList<Item> itemList = listItemFromFile("Item.txt");
+        ArrayList<OrderItem> orderList = new ArrayList<>();
+        boolean leave = true, error;
+        int selectedIndex = 0, quantity = 0;
+        char choice;
         
         do{
-            int selectedIndex;
-            int quantity;
-            
-            System.out.println("Available Items:");
-            for (int i = 0; i < ListItems.size(); i++) {
-                System.out.println((i+1) + ". " + ListItems.get(i).getItemName());
+            System.out.println("  Available Items:");
+            for (int i = 0; i < itemList.size(); i++) {
+                System.out.println("  " + (i+1) + ". " + itemList.get(i).getItemName());
             }
-            System.out.println();
-            System.out.print("Select Item to add: ");
-            selectedIndex = sc.nextInt();
+            do{
+                error = true;
+                System.out.print("\n  Select Item to add: ");
+                try{
+                    selectedIndex = sc.nextInt();
+                    if(selectedIndex >= 1 && selectedIndex <= (itemList.size())){
+                        error = false;
+                    }else{
+                        System.out.println("  Input Error, Please Try Again!!!");
+                    }   
+                }catch(InputMismatchException e){
+                    System.out.println("  Input Error, Please Try Again!!!");
+                }
+                sc.nextLine();
+            }while(error);
+
+            do{
+                error = false;
+                System.out.print("\n  Quantity: ");
+                try{
+                    quantity = sc.nextInt();
+                    
+                }catch(InputMismatchException e){
+                    System.out.println("  Input Error, Please Try Again!!!");
+                    error = true;
+                }
+                sc.nextLine();
+            }while(error);
             
-            System.out.print("Quantity: ");
-            quantity = sc.nextInt();
-            
-            
-            Item items = ListItems.get(selectedIndex-1);
-            System.out.println(items.getItemName());
-            OrderItem ordItem = new OrderItem(items, quantity);
-            ordList.add(ordItem);
+            OrderItem ordItem = new OrderItem(itemList.get(selectedIndex-1), quantity);
+            orderList.add(ordItem);
             
             do{
-                System.out.print("Continue Adding Item ? (Y/N): ");
-                done = Character.toUpperCase(sc.next(".").charAt(0));
-                System.out.println();
-               
-                
-            }while(done != 'Y' && done != 'N');
-            System.out.println();
+                error = true;
+                System.out.print("  Continue Adding Item ? (Y/N): ");
+                try{
+                    choice = Character.toUpperCase(sc.next(".").charAt(0));
+                    switch (choice){
+                        case 'Y':{
+                            error = false;
+                            leave = false;
+                            break;
+                        }
+                        case 'N':{
+                            break;
+                        }
+                        default:{
+                            System.out.println("  Input Error, Please Try Again!!!");
+                        }
+                    }
+                }catch(InputMismatchException e){
+                    System.out.println("  Input Error, Please Try Again!!!");
+                }
+                sc.nextLine();
+            }while(error); 
             
-        }while(done == 'Y');
-       
-        return ordList;
+        }while(leave);
+        
+        return orderList;
     }
     
-    public static void listOrdItems(ArrayList<OrderItem> orderItems){
-        if(orderItems != null){
-            int itemCount = orderItems.size();
-            System.out.println("Items Selected: ");
-            for (int i = 0; i < itemCount; i++){
-                System.out.println((i+1) + ". " + orderItems.get(i).getItem().getItemName() + "\t" + 
-                    orderItems.get(i).getQuantity() + "\t" + orderItems.get(i).getTotalPrice());
-            }   
-        }else {
-            System.out.println("Items Selected: ");
-        }
+    public static void listOrdItems(ArrayList<OrderItem> orderList){
+        System.out.println("  Items Selected: ");
+        
+        for (int i = 0; i < orderList.size(); i++){
+            System.out.println("  " + (i+1) + ". " + orderList.get(i).getItem().getItemName() + "\t" + 
+                orderList.get(i).getQuantity() + "\t" + orderList.get(i).getTotalPrice());
+        } 
     }
     
-    public static void deleteOrdItems(ArrayList<OrderItem> orderItems){ 
-        if(orderItems != null){
-            Scanner sc = new Scanner(System.in);
-            int choice;
-            char choice2;
-
-            System.out.println("Enter the Item You Want To Delete: ");
-            choice = sc.nextInt();
-            choice--;
-            do {
-                System.out.println();
-                System.out.println("Are You Sure You Want to Delete This Item !! (Y/N)");
-                choice2 = Character.toUpperCase(sc.next(".").charAt(0));
-
-            }while(choice2 != 'Y' && choice2 != 'N');
-
-            if(choice2 == 'Y'){
-                orderItems.remove(choice);
-            }
-        }else {
-            System.out.println("Item List Empty!!!");
-        }
-    }
+//    public static void deleteOrdItems(ArrayList<OrderItem> orderItems){ 
+//        if(orderItems != null){
+//            Scanner sc = new Scanner(System.in);
+//            int choice;
+//            char choice2;
+//
+//            System.out.println("Enter the Item You Want To Delete: ");
+//            choice = sc.nextInt();
+//            choice--;
+//            do {
+//                System.out.println();
+//                System.out.println("Are You Sure You Want to Delete This Item !! (Y/N)");
+//                choice2 = Character.toUpperCase(sc.next(".").charAt(0));
+//
+//            }while(choice2 != 'Y' && choice2 != 'N');
+//
+//            if(choice2 == 'Y'){
+//                orderItems.remove(choice);
+//            }
+//        }else {
+//            System.out.println("Item List Empty!!!");
+//        }
+//    }
     
-    public static void savePOToFile(String orderID, ArrayList<OrderItem> orderItems,String supplierName, 
-            LocalDate orderDate, String status, double totalPOprice, int itemCount) {
-        String fileName = "PO.txt";
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(fileName, true))) {
-            bw.write(orderID + "|" +  supplierName + "|" + orderDate + "|" + status + "|" + totalPOprice + "|" + itemCount);
-            for (int i = 0; i < itemCount; i++){
+    public static void savePOToFile(PurchaseOrder po) {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter("PO.txt", true))) {
+            bw.write(po.getOrderID() + "|" +  po.getSupplierName() + "|" + po.getOrderDate() + "|" + 
+                    po.getStatus() + "|" + po.getTotalPOprice() + "|" + po.getItemCount());
+            for (int i = 0; i < po.getItemCount(); i++){
                 bw.newLine();
-                bw.write(orderItems.get(i).getItem().getItemName() + "|" + orderItems.get(i).getQuantity() + "|" +
-                        orderItems.get(i).getTotalPrice());
+                bw.write(po.getOrderItems().get(i).getItem().getItemName() + "|" + po.getOrderItems().get(i).getQuantity() + "|" +
+                        po.getOrderItems().get(i).getTotalPrice());
             }
             bw.newLine();
-            System.out.println("Order Successful!!");
+            System.out.println("  Order Successful!!");
             
         } catch (IOException e) {
             e.printStackTrace();
-            System.out.println("Unable to Open File !!!");
+            System.out.println("  Something Went Wrong !!!");
+            System.exit(1);
         }
     }
      
@@ -300,10 +323,10 @@ public class PurchaseOrder {
             }
     
         } catch (FileNotFoundException e){
-            System.out.println("File Not Found !!!");
+            System.out.println("  File Not Found !!!");
         } catch (IOException e) {
             e.printStackTrace();
-            System.out.println("Something Went Wrong !!!");
+            System.out.println("  Something Went Wrong !!!");
             System.exit(1);
         }
         return poList;

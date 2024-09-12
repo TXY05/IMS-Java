@@ -1,30 +1,44 @@
+import java.io.*;
+import java.util.*;
+
 public class OrderItem {
-    private Item item;
-    private int orderQuantity;
-
-    public OrderItem(String itemName, int itemQuantity, ItemGroups itemGroup, int orderQuantity) {
-        this.item = new Item(itemName, itemQuantity, itemGroup);
-        this.orderQuantity = orderQuantity;
+    private Item items;
+    private String ordItemName;
+    private int quantity;
+    private double totalPrice;
+    
+    // for saving
+    public OrderItem(Item items, int quantity){
+        this.items = items;
+        this.quantity = quantity;
+        this.totalPrice = getTotalPrice(items, quantity);
     }
-
-    public OrderItem(String name, int quantity, ItemGroups groupName, double buyPrice, int maxInvLV, int minInvLV, int orderQuantity) {
-        this.item = new Item(name, quantity, groupName, buyPrice, maxInvLV, minInvLV);
-        this.orderQuantity = orderQuantity;
+    
+    // for reading
+    public OrderItem(String name, int quantity, double totalPrice){
+        this.ordItemName = name;
+        this.quantity = quantity;
+        this.totalPrice = totalPrice;
     }
-
-    public int getOrderQuantity() {
-        return orderQuantity;
+    
+    public Item getItem(){
+        return items;
     }
-
-    public void setOrderQuantity(int orderQuantity) {
-        this.orderQuantity = orderQuantity;
+    
+    public String getOrdItemName(){
+        return ordItemName;
     }
-
-    public Item getItem() {
-        return item;
+    
+    public int getQuantity(){
+        return quantity;
     }
-
-    public void setItem(Item item) {
-        this.item = item;
+    
+    public double getTotalPrice(){
+        return totalPrice;
+    }
+    
+    public double getTotalPrice(Item items, int quantity){
+        double tot = items.getBuyPrice() * quantity; 
+        return tot;
     }
 }
