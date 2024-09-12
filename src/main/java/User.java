@@ -108,5 +108,13 @@ public class User extends Person {
         }
         return true;
     }
+    
+    public void encryption(){
+        
+    }
+    
+    public void decryption(){
+        
+    }
 
 }

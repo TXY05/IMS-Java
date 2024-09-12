@@ -1,4 +1,4 @@
-public class Person {
+public abstract class Person {
 
     private String name;
     private String email;
@@ -7,7 +7,7 @@ public class Person {
         
     }
     
-    public Person(String name, String email) {
+    protected Person(String name, String email) {
         this.name = name;
         this.email = email;
     }
@@ -32,5 +32,8 @@ public class Person {
     public String toString() {
         return "Person{" + "name=" + name + ", email=" + email + '}';
     }
-
+    
+    public abstract void encryption();
+    public abstract void decryption();
+    
 }

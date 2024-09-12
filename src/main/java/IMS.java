@@ -14,7 +14,7 @@ public class IMS {
         Scanner scanner = new Scanner(System.in);
         boolean login, signup;
         int choice = 0;
-
+                
         User user = new User();
 
         do {
