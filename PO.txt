@@ -1,0 +1,10 @@
+PO0001|GHI|2024-09-12|Return|4.0|1
+Laptop|2|4.0
+PO0001|DEF|2024-09-12|Receive|20.5|2
+PC|5|12.5
+Laptop|4|8.0
+PO0001|GHI|2024-09-12|Pending|19.2|2
+Laptop|6|12.0
+Apple|6|7.19
+PO0001|DEF|2024-09-12|Pending|12.0|1
+Laptop|6|12.0
