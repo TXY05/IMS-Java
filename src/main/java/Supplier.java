@@ -14,8 +14,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class Supplier extends Person {
-    private String filename = "Supplier.txt";
-    
+    private static String filename = "Supplier.txt";
     
     private Address address;
     private String id;
@@ -40,17 +39,21 @@ public class Supplier extends Person {
         return id;
     }
     
-    public ArrayList<Supplier> getSupplier(){
+    public ArrayList<String> getItemList(){
+        return itemList;
+    }
+    
+    public static ArrayList<Supplier> getSupplier(){
         ArrayList<Supplier> supplier = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
             String line;
             while ((line = br.readLine()) != null) {
+                ArrayList<String> itemList = new ArrayList<>();
                 String[] row = line.split("[|]");
                 String[] item = row[6].split(",");
                 for(String i:item){
                     itemList.add(i);
                 }
-                
                 supplier.add(new Supplier(row[0],row[1],row[2],new Address(row[3],row[4],Integer.parseInt(row[5])),itemList));
             }
         } catch (IOException e) {

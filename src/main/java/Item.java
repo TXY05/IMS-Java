@@ -40,12 +40,9 @@ public class Item {
         this.minInvLV = minInvLV;
     }
 
-    public Item(String itemId, String itemName, int itemQuantity, double buyPrice, ItemGroups itemGroup){
+    public Item(String itemId, String itemName){
         this.itemId = itemId;
         this.itemName = itemName;
-        this.itemQuantity = itemQuantity;
-        this.buyPrice = buyPrice;
-        this.itemGroup = itemGroup;
     }
     
     // Getters and Setters

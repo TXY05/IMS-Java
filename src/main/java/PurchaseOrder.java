@@ -7,16 +7,17 @@ public class PurchaseOrder {
     private static final AtomicInteger idCounter = new AtomicInteger(0);
     private String orderID;
     private ArrayList<OrderItem> orderItems;
-    private Supplier supplier;
+    private Supplier supp;
+    private String suppID;
     private LocalDate orderDate;
     private String status;
     private double totalPOprice;
     private int itemCount;
 
-    public PurchaseOrder(ArrayList<OrderItem> orderItems, Supplier supplier) {
+    public PurchaseOrder(ArrayList<OrderItem> orderItems, Supplier supp) {
         this.orderID = generatePOId();
         this.orderItems = orderItems;
-        this.supplier = supplier;
+        this.supp = supp;
         this.orderDate = LocalDate.now();
         this.status = "Pending";
         this.totalPOprice = calTotalPOprice(orderItems);
@@ -27,7 +28,7 @@ public class PurchaseOrder {
             LocalDate date, String status, double totalPrice, int itemCount){
         this.orderID = orderID;
         this.orderItems = orderItems;
-        this.supplier = supplier;
+        this.suppID = suppID;
         this.orderDate = date;
         this.status = status;
         this.totalPOprice = totalPrice;
@@ -42,10 +43,14 @@ public class PurchaseOrder {
         return orderItems;
     }
 
-    public Supplier getSupplier() {
-        return supplier;
+    public Supplier getSupp() {
+        return supp;
     }
-
+    
+    public String getSuppID(){
+        return suppID;
+    }
+    
     public LocalDate getOrderDate() {
         return orderDate;
     }
@@ -63,7 +68,18 @@ public class PurchaseOrder {
     }
     
     public String generatePOId() {
-        return String.format("PO%04d", idCounter.incrementAndGet());
+        ArrayList<PurchaseOrder> poList = readPOFromFile("PO.txt");
+        
+        Set<String> existingIDs = new HashSet<>();
+        for (PurchaseOrder po : poList) {
+            existingIDs.add(po.getOrderID());
+        }
+        
+        String poID;
+        do {
+            poID = String.format("PO%04d", idCounter.incrementAndGet());
+        } while (existingIDs.contains(poID)); // Keep generating until a unique ID is found
+        return poID;
     }
     
     public double calTotalPOprice(ArrayList<OrderItem> orderItems){
@@ -73,45 +89,17 @@ public class PurchaseOrder {
         }
         return total;
     }
-
-    public static ArrayList<Supplier> listSupplierFromFile(String filename){
-        ArrayList<Supplier> ListSupplier = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                String[] parts = line.split(",");
-                if(parts.length == 5){
-                    String name = parts[0];
-                    String email = parts[1];
-                    String address = parts[2];
-                    String city = parts[3];
-                    int postalCode = Integer.parseInt(parts[4]);
-                    Address newAddress = new Address(address, city, postalCode);
-                    Supplier supp = new Supplier(newAddress, name, email);
-                    ListSupplier.add(supp);
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.out.println("  Unable to Open File !!!");
-        }
-        return ListSupplier;
-    }
     
-    public static ArrayList<Item> listItemFromFile(String filename){
+    public static ArrayList<Item> readNameAndIDFromItem(String filename){
         ArrayList<Item> ListItems = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
             String line;
             while ((line = br.readLine()) != null) {
                 String[] parts = line.split(",");
-                if(parts.length == 5){
+                if(parts.length >= 2){
                     String itemId = parts[0];
                     String itemName = parts[1];
-                    int itemQuantity = Integer.parseInt(parts[2]);
-                    double price = Double.parseDouble(parts[3]);
-                    String groupName = parts[4];
-                    ItemGroups itemGroup = new ItemGroups(groupName);
-                    Item items = new Item(itemId, itemName, itemQuantity, price, itemGroup);
+                    Item items = new Item(itemId, itemName);
                     ListItems.add(items);
                     
                 }
@@ -121,97 +109,228 @@ public class PurchaseOrder {
             System.out.println("Unable to Open File !!!");
         }
         return ListItems;
-    
     }
     
-    public static Supplier selectedSupp(){
+    public static void poMenu(){
         Scanner sc = new Scanner(System.in);
-        ArrayList<Supplier> ListSupplier = listSupplierFromFile("Supplier.txt");
-        ArrayList<Item> itemList = listItemFromFile("items.txt");
-        Supplier selSupp;
-        int selectedIndex = 0;
-        char done = 'Y';
+        boolean leave = true, error;
+        int choice;
         
         do{
+            System.out.println("=======================================================================================================");
+            System.out.println("  Purchase Order Menu");
+            System.out.println("=======================================================================================================");
+            System.out.println("  1. Create Purchase Order\n  2. View PO History\n  3. Return Main Menu");
+            
+            do{
+                error = true;
+                System.out.print("\n  Select: ");
+                try{
+                    choice = sc.nextInt();
+                    switch(choice){
+                        case 1:{
+                            error = false;
+                            createPOMenu();
+                            break;
+                        }
+                        case 2:{
+                            error = false;
+                            poHistory();
+                            break;
+                        }
+                        case 3:{
+                            error = false;
+                            leave = false;
+                            break;
+                        }
+                        default:{
+                            System.out.println("  Input Error, Please Try Again!!!");
+                            break;
+                        }
+                    }
+                }catch(InputMismatchException e){
+                    System.out.println("  Input Error, Please Try Again!!!");
+                }
+                sc.nextLine();
+            }while(error); 
+        }while(leave);
+    }
+    
+    public static void createPOMenu(){
+        Supplier selSupp;
+        ArrayList<OrderItem> ordList = new ArrayList<>();
+        
+        Scanner sc = new Scanner(System.in);
+        boolean leave = true, error;
+        int choice;
+        
+        selSupp = selectedSupp(ordList);
+        addOrdItems(ordList, selSupp);
+                
+        do{ 
+            listOrdItems(ordList);
+            System.out.println("  Options: ");
+            System.out.println("  1. Continue Add Item\n  2. Reduce Item Quantity\n  3. Edit Unit Price\n  4. Make Order\n  5. Return");
+            do{
+                error = true;
+                System.out.printf("\n  Select: ");
+                try{
+                    choice = sc.nextInt();
+                    switch(choice){
+                        case 1:{
+                            error = false;
+                            addOrdItems(ordList, selSupp);
+                            break;
+                        }
+                        case 2:{
+                            error = false;
+                            reduceOrdItemsQty(ordList);
+                            break;
+                        }
+                        case 3:{
+                            error = false;
+                            editUnitPrice(ordList);
+                            break;
+                        }
+                        case 4:{
+                            error = false;
+                            leave = false;
+                            createPO(ordList, selSupp);
+                            break;
+                        }
+                        case 5:{
+                            error = false;
+                            leave = false;
+                            break;
+                        }
+                        default:{
+                            System.out.println("  Input Error, Please Try Again!!!");
+                            break;
+                        }
+                    }
+                }catch(InputMismatchException e){
+                    System.out.println("  Input Error, Please Try Again!!!");
+                }
+                sc.nextLine();
+            }while(error); 
+        }while(leave);
+    }
+    
+    public static Supplier selectedSupp(ArrayList<OrderItem> orderList){
+        ArrayList<Supplier> ListSupplier = Supplier.getSupplier();
+        ArrayList<Item> itemList = readNameAndIDFromItem("items.txt");
+        
+        Scanner sc = new Scanner(System.in);
+        boolean leave = true, error;
+        int selectedIndex = 0;
+        char choice;
+
+        do{ 
+            System.out.println("=======================================================================================================");
             System.out.println("  Supplier List: ");
+            System.out.println("=======================================================================================================");
             for (int i = 0; i < ListSupplier.size(); i++) {
-                System.out.println((i+1) + ". " + ListSupplier.get(i).getName());
+                System.out.printf("  %-2d. %s\n", (i+1), ListSupplier.get(i).getName());
             }
             
             do {
+                error = true;
+                System.out.print("\n  Select: ");
                 try {
-                    System.out.print("  Select: ");
                     selectedIndex = sc.nextInt()-1;
                     
                     if (selectedIndex < 0 || selectedIndex >= ListSupplier.size()) {
                         System.out.println("  Error: Selection out of range. Please select a number between 1 and " + ListSupplier.size());
+                    }else{
+                        error = false;
                     }
                     
                 }catch(InputMismatchException e){
                     System.out.println("  Input Error, Please Try Again!!");
                 }
-            }while(selectedIndex < 0 || selectedIndex > (ListSupplier.size()-1));
+                sc.nextLine();
+            }while(error);
             
-//            ListSupplier.get(selectedIndex).get(i).getItemId();
-//            for(int i = 0; i < 2; i++){
-//                System.out.println((i+1) + ". " + itemList.indexOf(i).getItemName());
-//            }
-//            show supplier item
+            System.out.println("=======================================================================================================");
+            System.out.printf("  Supplier Selected: %s\n", ListSupplier.get(selectedIndex).getName());
+            System.out.println("=======================================================================================================");
+            for(int i = 0; i < ListSupplier.get(selectedIndex).getItemList().size(); i++){
+                String itemID = ListSupplier.get(selectedIndex).getItemList().get(i);
+                for(int j = 0; j < itemList.size(); j++){
+                    if(itemID.equals(itemList.get(j).getItemId())){
+                        System.out.printf("  %2d. %s\n", (i+1), itemList.get(j).getItemName());
+                    }
+                  }
+            }
             
             do{
+                error = true;
+                System.out.print("\n  Confirm Selection ? (Y/N): ");
                 try {
-                    System.out.print("  Confirm Selection ? (Y/N): ");
-                    done = Character.toUpperCase(sc.next(".").charAt(0));
-                }catch(Exception e){
+                    choice = Character.toUpperCase(sc.next(".").charAt(0));
+                    switch (choice){
+                        case 'Y':{
+                            error = false;
+                            leave = false;
+                            for(int i = 0; i < ListSupplier.get(selectedIndex).getItemList().size(); i++){
+                                String itemID = ListSupplier.get(selectedIndex).getItemList().get(i);
+                                for(int j = 0; j < itemList.size(); j++){
+                                    if(itemID.equals(itemList.get(j).getItemId())){
+                                        orderList.add(new OrderItem(itemList.get(j)));
+                                    }
+                                  }
+                            }
+                            break;
+                        }
+                        case 'N':{
+                            error = false;
+                            break;
+                        }
+                        default:{
+                            System.out.println("  Input Error, Please Try Again!!!");
+                        }
+                    }
+                }catch(InputMismatchException e){
                     System.out.println("  Input Error, Please Try Again!!");
                 }
-            }while(done != 'Y' && done != 'N');
-            
-            selSupp = ListSupplier.get(selectedIndex);
-            System.out.println("\n");
-            
-        }while(done == 'N');
+                sc.nextLine();
+            }while(error);
+        }while(leave);
+        
+        Supplier selSupp = ListSupplier.get(selectedIndex);
+        System.out.println("\n");
         
         return selSupp;
     }
     
-    public static ArrayList<OrderItem> addOrdItems(){
+    public static void addOrdItems(ArrayList<OrderItem> orderList, Supplier selSupp){
         Scanner sc = new Scanner(System.in);
-        ArrayList<Item> itemList = listItemFromFile("items.txt");
-        ArrayList<OrderItem> orderList = new ArrayList<>();
         boolean leave = true, error;
         int selectedIndex = 0, quantity = 0;
         double unitPrice = 0;
         char choice;
         
-        Supplier selSupp = selectedSupp();
-        
         do{
             System.out.println("=======================================================================================================");
             System.out.println("  Available Items:");
             System.out.println("=======================================================================================================");
-//            for (int i = 0; i < itemList.size(); i++) {
-//                System.out.println("  " + (i+1) + ". " + itemList.get(i).getItemName());
-
-//                OrderItem ordItem = new OrderItem(itemList.get(selectedIndex-1), 0, 0.0);
-//                orderList.add(ordItem);
-
-//            }Show Supplier Item
+            for(int i = 0; i < orderList.size(); i++){
+                System.out.printf("  %2d. %s\n", (i+1), orderList.get(i).getItem().getItemName());
+            }
+            
+            listOrdItems(orderList);
             do{
                 error = true;
-                System.out.println("=======================================================================================================");
                 System.out.print("  Select Item to add: ");
                 try{
-                    selectedIndex = sc.nextInt();
-                    if(selectedIndex >= 1 && selectedIndex <= (itemList.size())){
+                    selectedIndex = sc.nextInt()-1;
+                    if(selectedIndex >= 0 && selectedIndex < (orderList.size())){
                         error = false;
                     }else{
-                        System.out.println("=======================================================================================================");
-                        System.out.println("  Input Error, Please Try Again!!!");
+                        System.out.println("  Input Error, Please Try Again!!!\n");
                     }   
                 }catch(InputMismatchException e){
-                    System.out.println("=======================================================================================================");
-                    System.out.println("  Input Error, Please Try Again!!!");
+                    System.out.println("  Input Error, Please Try Again!!!\n");
                 }
                 sc.nextLine();
             }while(error);
@@ -224,33 +343,37 @@ public class PurchaseOrder {
                     quantity = sc.nextInt();
                     if(quantity < 1){
                         System.out.println("  Cannot Be Less Than 1 !!!");
+                    }else{
+                        error = false;
+                        orderList.get(selectedIndex).setQuantity(quantity);
                     }
                     
                 }catch(InputMismatchException e){
-                    System.out.println("=======================================================================================================");
                     System.out.println("  Input Error, Please Try Again!!!");
-                    error = true;
                 }
                 sc.nextLine();
             }while(error);
             
-            do{
-                error = false;
-                System.out.println("=======================================================================================================");
-                System.out.print("  Unit Price: ");
-                try{
-                    unitPrice = sc.nextDouble();
-                    
-                }catch(InputMismatchException e){
-                    System.out.println("=======================================================================================================");
-                    System.out.println("  Input Error, Please Try Again!!!");
+            if(orderList.get(selectedIndex).getUnitPrice() == 0.0){
+                do{
                     error = true;
-                }
-                sc.nextLine();
-            }while(error);
-            
-//            OrderItem ordItem = new OrderItem(itemList.get(selectedIndex-1), quantity);
-//            orderList.add(ordItem);
+                    System.out.println("=======================================================================================================");
+                    System.out.print("  Unit Price: ");
+                    try{
+                        unitPrice = sc.nextDouble();
+                        if(unitPrice < 1){
+                            System.out.println("  Cannot Be Less Than 1 !!!");
+                        }else{
+                            error = false;
+                            orderList.get(selectedIndex).setUnitPrice(unitPrice);
+                        }
+
+                    }catch(InputMismatchException e){
+                        System.out.println("  Input Error, Please Try Again!!!");
+                    }
+                    sc.nextLine();
+                }while(error);
+            }
             
             do{
                 error = true;
@@ -269,55 +392,331 @@ public class PurchaseOrder {
                             break;
                         }
                         default:{
-                            System.out.println("=======================================================================================================");
                             System.out.println("  Input Error, Please Try Again!!!");
                         }
                     }
                 }catch(InputMismatchException e){
-                    System.out.println("=======================================================================================================");
                     System.out.println("  Input Error, Please Try Again!!!");
                 }
                 sc.nextLine();
             }while(error); 
             
         }while(leave);
-        
-        return orderList;
     }
     
     public static void listOrdItems(ArrayList<OrderItem> orderList){
+        boolean display = true;
+        int noCount = 1;
+        
+        Collections.sort(orderList, Comparator.comparing(OrderItem::getQuantity).reversed());
+        System.out.println("=======================================================================================================");
         System.out.println("  Items Selected: ");
+        System.out.println("=======================================================================================================");
+        System.out.println("  No. \t Items \t\t\t Quantity \t   Unity Price \t\t Total Price");
         System.out.println("=======================================================================================================");
         
         for (int i = 0; i < orderList.size(); i++){
-            System.out.println("  " + (i+1) + ". " + orderList.get(i).getItem().getItemName() + "\t" + 
-                orderList.get(i).getQuantity() + "\t" + orderList.get(i).getUnitPrice() + "\t" + orderList.get(i).getTotalPrice());
-        } 
-    }
+            if(orderList.get(i).getQuantity() != 0){
+                System.out.printf("  %2d. \t %-20s \t %d \t\t   %-8.2f \t\t %-8.2f\n" , noCount, orderList.get(i).getItem().getItemName(), orderList.get(i).getQuantity(),
+                    orderList.get(i).getUnitPrice(), orderList.get(i).getTotalPrice());
+                display = false;
+                noCount++;
+            } 
+        }
+        
+        if(display){
+            System.out.println("  [EMPTY]");
+            System.out.println("=======================================================================================================");
+        }else{
+            System.out.println("=======================================================================================================");
+        }
+    }    
     
-    public static void poMenu(){
+    public static void reduceOrdItemsQty(ArrayList<OrderItem> orderList){ 
         Scanner sc = new Scanner(System.in);
         boolean leave = true, error;
-        int choice;
+        int selectedIndex = 0, choice, quantity;
         
         do{
-            System.out.println("=======================================================================================================");
-            System.out.println("  Purchase Order Menu");
-            System.out.println("=======================================================================================================");
-            System.out.println("  1. Create Purchase Order\n  2. View PO History");
-            System.out.println("  Select");
-            
-            System.out.println("");
+            listOrdItems(orderList);
             do{
                 error = true;
+                System.out.print("  Select Item you want to reduce: ");
+                try{
+                    selectedIndex = sc.nextInt()-1;
+                    if(selectedIndex >= 0 && selectedIndex < (orderList.size())){
+                        error = false;
+                    }else{
+                        System.out.println("  Input Error, Please Try Again!!!\n");
+                    }   
+                }catch(InputMismatchException e){
+                    System.out.println("  Input Error, Please Try Again!!!\n");
+                }
+                sc.nextLine();
+            }while(error);
+            
+            do{
+                error = true;
+                System.out.println("=======================================================================================================");
+                System.out.print("  Quantity: ");
+                try{
+                    quantity = sc.nextInt();
+                    if(quantity < 1){
+                        System.out.println("  Cannot Be Less Than 1 !!!");
+                    }else{
+                        error = false;
+                        orderList.get(selectedIndex).reduceQuantity(quantity);
+                    }
+                    
+                }catch(InputMismatchException e){
+                    System.out.println("  Input Error, Please Try Again!!!");
+                }
+                sc.nextLine();
+            }while(error);
+            
+            do {
+                System.out.println("=======================================================================================================");
+                System.out.print("  Continue Reducing Item ? (Y/N): ");
+                try{
+                    choice = Character.toUpperCase(sc.next(".").charAt(0));
+                        switch (choice){
+                            case 'Y':{
+                                error = false;
+                                break;
+                            }
+                            case 'N':{
+                                error = false;
+                                leave = false;
+                                break;
+                            }
+                            default:{
+                                System.out.println("  Input Error, Please Try Again!!!");
+                            }
+                        }
+                }catch(InputMismatchException e){
+                    System.out.println("  Input Error, Please Try Again!!!");
+                }
+                sc.nextLine();
+            }while(error);
+        }while(leave);
+        
+    }
+    
+    public static void editUnitPrice(ArrayList<OrderItem> orderList){
+        Scanner sc = new Scanner(System.in);
+        boolean leave = true, error;
+        int selectedIndex = 0, choice;
+        double unitPrice;
+        
+        do{
+            listOrdItems(orderList);
+            do{
+                error = true;
+                System.out.print("  Select Item you want to edit Price: ");
+                try{
+                    selectedIndex = sc.nextInt()-1;
+                    if(selectedIndex >= 0 && selectedIndex < (orderList.size())){
+                        error = false;
+                    }else{
+                        System.out.println("  Input Error, Please Try Again!!!\n");
+                    }   
+                }catch(InputMismatchException e){
+                    System.out.println("  Input Error, Please Try Again!!!\n");
+                }
+                sc.nextLine();
+            }while(error);
+            
+            do{
+                error = true;
+                System.out.println("=======================================================================================================");
+                System.out.print("  Unit Price: ");
+                try{
+                    unitPrice = sc.nextDouble();
+                    if(unitPrice < 1){
+                        System.out.println("  Cannot Be Less Than 1 !!!");
+                    }else{
+                        error = false;
+                        orderList.get(selectedIndex).setUnitPrice(unitPrice);
+                    }
+
+                }catch(InputMismatchException e){
+                    System.out.println("  Input Error, Please Try Again!!!");
+                }
+                sc.nextLine();
+            }while(error);
+            
+            do {
+                System.out.println("=======================================================================================================");
+                System.out.print("  Continue Editing Unit Price ? (Y/N): ");
+                try{
+                    choice = Character.toUpperCase(sc.next(".").charAt(0));
+                        switch (choice){
+                            case 'Y':{
+                                error = false;
+                                break;
+                            }
+                            case 'N':{
+                                error = false;
+                                leave = false;
+                                break;
+                            }
+                            default:{
+                                System.out.println("  Input Error, Please Try Again!!!");
+                            }
+                        }
+                }catch(InputMismatchException e){
+                    System.out.println("  Input Error, Please Try Again!!!");
+                }
+                sc.nextLine();
+            }while(error);
+        }while(leave);
+    }
+    
+    public static void createPO(ArrayList<OrderItem> orderList, Supplier supp){
+        Scanner sc = new Scanner(System.in);
+        boolean error;
+        char choice;
+       
+        for(int i = orderList.size() - 1; i >= 0; i--){
+            if(orderList.get(i).getQuantity() == 0){
+                orderList.remove(i);
+            }
+        }
+        
+        PurchaseOrder po = new PurchaseOrder(orderList, supp);
+        showPO(po);
+        
+        do{
+            error = true;
+            System.out.print("  Confirm Create Purchase Order (Y/N): ");
+            try{
+                choice = Character.toUpperCase(sc.next(".").charAt(0));
+                switch (choice){
+                    case 'Y':{
+                        error = false;
+                        savePOToFile(po);
+                        sc.nextLine();
+                        break;
+                    }
+                    case 'N':{
+                        error = false;
+                        break;
+                    }
+                    default:{
+                        System.out.println("  Input Error, Please Try Again!!!\n");
+                    }
+                }
+            }catch(InputMismatchException e){
+                System.out.println("  Input Error, Please Try Again!!!\n");
+            }
+            sc.nextLine();
+        }while(error);
+    }
+    
+    public static void savePOToFile(PurchaseOrder po) {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter("PO.txt", true))) {
+            bw.write(po.getOrderID() + "|" +  po.getSupp().getId() + "|" + po.getOrderDate() + "|" + 
+                    po.getStatus() + "|" + po.getTotalPOprice() + "|" + po.getItemCount());
+            for (int i = 0; i < po.getItemCount(); i++){
+                bw.newLine();
+                bw.write(po.getOrderItems().get(i).getItem().getItemId() + "|" + po.getOrderItems().get(i).getQuantity() + "|" +
+                        po.getOrderItems().get(i).getUnitPrice());
+            }
+            bw.newLine();
+            System.out.println("  Order Successful!!");
+            
+            
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("  Something Went Wrong !!!");
+            System.exit(1);
+        }
+    }
+     
+    public static ArrayList<PurchaseOrder> readPOFromFile(String filename){
+        ArrayList<PurchaseOrder> poList = new ArrayList<>();
+        ArrayList<OrderItem> orderList = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] parts = line.split("\\|");
+                if (parts.length == 6){
+                    String poID = parts[0];
+                    String suppID = parts[1];
+                    LocalDate date = LocalDate.parse(parts[2]);
+                    String status = parts[3];
+                    double totalPrice = Double.parseDouble(parts[4]);
+                    int itemCount = Integer.parseInt(parts[5]);
+                
+                    for(int i = 0; i < itemCount; i++){
+                        line = br.readLine();
+                        String[] part = line.split("\\|");
+                        if (part.length == 3){
+                            String itemID = part[0];
+                            int quantity = Integer.parseInt(part[1]);
+                            double unitPrice = Double.parseDouble(part[2]);
+                            OrderItem ordItem = new OrderItem(itemID, quantity, unitPrice);
+                            orderList.add(ordItem);
+                        }
+                    }
+                    PurchaseOrder po = new PurchaseOrder(poID, orderList, suppID, date, status, totalPrice, itemCount);
+                    poList.add(po);
+                }
+            }
+    
+        } catch (FileNotFoundException e){
+            System.out.println("  File Not Found !!!");
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("  Something Went Wrong !!!");
+            System.exit(1);
+        }
+        return poList;
+    }
+    
+    public static void poHistory(){
+        Scanner sc = new Scanner(System.in);
+        ArrayList<PurchaseOrder> poList = readPOFromFile("PO.txt");
+        ArrayList<Supplier> ListSupplier = Supplier.getSupplier();
+        boolean leave = true, error;
+        int choice;
+        String tempSuppName = "";
+        
+        do{
+            System.out.println("\n  Purchase Order History: ");
+            System.out.println("=======================================================================================================");
+            System.out.println("       Order No." + "\tSupplier Name\t\t       " + "Order Date\t" + "Order Price\t" + "Status \t");
+            System.out.println("=======================================================================================================");
+            
+            for (int i = 0; i < poList.size(); i++){
+                for(int j = 0; j < ListSupplier.size(); j++){
+                    if(poList.get(i).getSuppID().equals(ListSupplier.get(j).getId())){
+                        tempSuppName = ListSupplier.get(j).getName();
+                    }
+                }
+                System.out.printf(" %3d.  %s\t\t%-30s %s \t%-8.2f \t%-10s\n", (i+1), poList.get(i).getOrderID(), tempSuppName, 
+                        poList.get(i).getOrderDate(), poList.get(i).getTotalPOprice(), poList.get(i).getStatus());
+                System.out.println("=======================================================================================================");
+            }
+
+            do{
+                error = true;
+                System.out.println("\n  Options:");
+                System.out.print("  1. Change Sorting Type\n  2. View Purchase Order Detail\n  3. Return\n  Please Select: ");
                 try{
                     choice = sc.nextInt();
                     switch(choice){
                         case 1:{
                             error = false;
+                            sortPOHistory(poList);
                             break;
                         }
                         case 2:{
+                            error = false;
+                            selectPO(poList);
+                            break;
+                        }
+                        case 3:{
                             error = false;
                             leave = false;
                             break;
@@ -331,212 +730,68 @@ public class PurchaseOrder {
                     System.out.println("  Input Error, Please Try Again!!!");
                 }
                 sc.nextLine();
-            }while(error); 
+            }while(error);
         }while(leave);
     }
     
-    
-//    public static void deleteOrdItems(ArrayList<OrderItem> orderItems){ 
-//        if(orderItems != null){
-//            Scanner sc = new Scanner(System.in);
-//            int choice;
-//            char choice2;
-//
-//            System.out.println("Enter the Item You Want To Delete: ");
-//            choice = sc.nextInt();
-//            choice--;
-//            do {
-//                System.out.println();
-//                System.out.println("Are You Sure You Want to Delete This Item !! (Y/N)");
-//                choice2 = Character.toUpperCase(sc.next(".").charAt(0));
-//
-//            }while(choice2 != 'Y' && choice2 != 'N');
-//
-//            if(choice2 == 'Y'){
-//                orderItems.remove(choice);
-//            }
-//        }else {
-//            System.out.println("Item List Empty!!!");
-//        }
-//    }
-    
-    public static void savePOToFile(PurchaseOrder po) {
-//        try (BufferedWriter bw = new BufferedWriter(new FileWriter("PO.txt", true))) {
-//            bw.write(po.getOrderID() + "|" +  po.getSupplierName() + "|" + po.getOrderDate() + "|" + 
-//                    po.getStatus() + "|" + po.getTotalPOprice() + "|" + po.getItemCount());
-//            for (int i = 0; i < po.getItemCount(); i++){
-//                bw.newLine();
-//                bw.write(po.getOrderItems().get(i).getItem().getItemName() + "|" + po.getOrderItems().get(i).getQuantity() + "|" +
-//                        po.getOrderItems().get(i).getTotalPrice());
-//            }
-//            bw.newLine();
-//            System.out.println("  Order Successful!!");
-//            
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//            System.out.println("  Something Went Wrong !!!");
-//            System.exit(1);
-//        }
-    }
-     
-//    public static ArrayList<PurchaseOrder> readPOFromFile(String filename){
-//        ArrayList<PurchaseOrder> poList = new ArrayList<>();
-//        ArrayList<OrderItem> orderList = new ArrayList<>();
-//        try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
-//            String line;
-//            while ((line = br.readLine()) != null) {
-//                String[] parts = line.split("\\|");
-//                String poID = parts[0];
-//                String suppName = parts[1];
-//                LocalDate date = LocalDate.parse(parts[2]);
-//                String status = parts[3];
-//                double totalPrice = Double.parseDouble(parts[4]);
-//                int itemCount = Integer.parseInt(parts[5]);
-//                
-//                for(int i = 0; i < itemCount; i++){
-//                    line = br.readLine();
-//                    String[] part = line.split("\\|");
-//                    String itemName = part[0];
-//                    int quantity = Integer.parseInt(part[1]);
-//                    double totalItemPrice = Double.parseDouble(part[2]);
-//                    OrderItem ordItem = new OrderItem(itemName, quantity, totalItemPrice);
-//                    orderList.add(ordItem);
-//                }
-//            PurchaseOrder po = new PurchaseOrder(poID, orderList, suppName, date, status, totalPrice, itemCount);
-//            poList.add(po);
-//            }
-//    
-//        } catch (FileNotFoundException e){
-//            System.out.println("  File Not Found !!!");
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//            System.out.println("  Something Went Wrong !!!");
-//            System.exit(1);
-//        }
-//        return poList;
-//    }
-    
-    public static void poHistory(){
-//        Scanner sc = new Scanner(System.in);
-//        ArrayList<PurchaseOrder> poList = readPOFromFile("PO.txt");
-//        boolean leave = true, error;
-//        int choice;
-//        
-//        do{
-//            System.out.println("\n  Purchase Order History: ");
-//            System.out.println("=======================================================================================================");
-//            System.out.println("       Order No." + "\tSupplier Name\t\t       " + "Order Date\t" + "Order Price\t" + "Status \t");
-//            System.out.println("=======================================================================================================");
-//            
-//            for (int i = 0; i < poList.size(); i++){
-//                System.out.printf(" %3d.  %s\t\t%-30s %s \t%-8.2f \t%-10s%n", (i+1), poList.get(i).getOrderID(),poList.get(i).getSupplierName(), 
-//                        poList.get(i).getOrderDate(), poList.get(i).getTotalPOprice(), poList.get(i).getStatus());
-//                System.out.println("=======================================================================================================");
-//            }
-//
-//            do{
-//                error = true;
-//                System.out.println("\n  Options:");
-//                System.out.print("  1. Change Sorting Type\n  2. View Purchase Order Detail\n  3. Return\n  Please Select: ");
-//                try{
-//                    choice = sc.nextInt();
-//                    switch(choice){
-//                        case 1:{
-//                            error = false;
-//                            sortPOHistory(poList);
-//                            break;
-//                        }
-//                        case 2:{
-//                            error = false;
-//                            selectPO(poList);
-//                            break;
-//                        }
-//                        case 3:{
-//                            error = false;
-//                            leave = false;
-//                            break;
-//                        }
-//                        default:{
-//                            System.out.println("  Input Error, Please Try Again!!!");
-//                            break;
-//                        }
-//                    }
-//                }catch(InputMismatchException e){
-//                    System.out.println("  Input Error, Please Try Again!!!");
-//                }
-//                sc.nextLine();
-//            }while(error);
-//        }while(leave);
-//    }
-//    
-//    public static void sortPOHistory(ArrayList<PurchaseOrder> poList){
-//        Scanner sc = new Scanner(System.in);
-//        boolean error;
-//        int choice;
-//        
-//        do{
-//            error = true;
-//            System.out.println("\n  Sorting Options:");
-//            System.out.println("  1. PurchaseOrder ID(Asc)\n  2. PurchaseOrder ID(Dec)\n  3. Supplier Name(Asc)\n  4. Supplier Name(Dec)");
-//            System.out.print("  5. Date(Asc)\n  6. Date(Dec)\n  7. Price(Asc)\n  8. Price(Dec)\n  9. Status(Asc)\n  Please Select: ");
-//            try{
-//                choice = sc.nextInt();
-//                switch(choice){
-//                    case 1:{
-//                        error = false;
-//                        Collections.sort(poList, Comparator.comparing(PurchaseOrder::getOrderID));
-//                        break;
-//                    }
-//                    case 2:{
-//                        error = false;
-//                        Collections.sort(poList, Comparator.comparing(PurchaseOrder::getOrderID).reversed());
-//                        break;
-//                    }
-//                    case 3:{
-//                        error = false;
-////                        Collections.sort(poList, Comparator.comparing(PurchaseOrder::getSupplierName));
-//                        break;
-//                    }
-//                    case 4:{
-//                        error = false;
-////                        Collections.sort(poList, Comparator.comparing(PurchaseOrder::getSupplierName).reversed());
-//                        break;
-//                    }
-//                    case 5:{
-//                        error = false;
-//                        Collections.sort(poList, Comparator.comparing(PurchaseOrder::getOrderDate));
-//                        break;
-//                    }
-//                    case 6:{
-//                        error = false;
-//                        Collections.sort(poList, Comparator.comparing(PurchaseOrder::getOrderDate).reversed());
-//                        break;
-//                    }
-//                    case 7:{
-//                        error = false;
-//                        Collections.sort(poList, Comparator.comparing(PurchaseOrder::getTotalPOprice));
-//                        break;
-//                    }
-//                    case 8:{
-//                        error = false;
-//                        Collections.sort(poList, Comparator.comparing(PurchaseOrder::getTotalPOprice).reversed());
-//                        break;
-//                    }
-//                    case 9:{
-//                        error = false;
-//                        Collections.sort(poList, Comparator.comparing(PurchaseOrder::getStatus));
-//                        break;
-//                    }
-//                    default:{
-//                        System.out.println("  Input Error, Please Try Again!!!");
-//                        break;
-//                    }
-//                }
-//            }catch(InputMismatchException e){
-//                System.out.println("  Input Error, Please Try Again!!!");
-//            }
-//            sc.nextLine();
-//        }while(error);
+    public static void sortPOHistory(ArrayList<PurchaseOrder> poList){
+        Scanner sc = new Scanner(System.in);
+        boolean error;
+        int choice;
+        
+        do{
+            error = true;
+            System.out.println("\n  Sorting Options:");
+            System.out.println("  1. PurchaseOrder ID(Asc)\n  2. PurchaseOrder ID(Dec)\n  3. Date(Asc)");
+            System.out.print("  4. Date(Dec)\n  5. Price(Asc)\n  6. Price(Dec)\n  .7 Status(Asc)\n  Please Select: ");
+            try{
+                choice = sc.nextInt();
+                switch(choice){
+                    case 1:{
+                        error = false;
+                        Collections.sort(poList, Comparator.comparing(PurchaseOrder::getOrderID));
+                        break;
+                    }
+                    case 2:{
+                        error = false;
+                        Collections.sort(poList, Comparator.comparing(PurchaseOrder::getOrderID).reversed());
+                        break;
+                    }
+                    case 3:{
+                        error = false;
+                        Collections.sort(poList, Comparator.comparing(PurchaseOrder::getOrderDate));
+                        break;
+                    }
+                    case 4:{
+                        error = false;
+                        Collections.sort(poList, Comparator.comparing(PurchaseOrder::getOrderDate).reversed());
+                        break;
+                    }
+                    case 5:{
+                        error = false;
+                        Collections.sort(poList, Comparator.comparing(PurchaseOrder::getTotalPOprice));
+                        break;
+                    }
+                    case 6:{
+                        error = false;
+                        Collections.sort(poList, Comparator.comparing(PurchaseOrder::getTotalPOprice).reversed());
+                        break;
+                    }
+                    case 7:{
+                        error = false;
+                        Collections.sort(poList, Comparator.comparing(PurchaseOrder::getStatus));
+                        break;
+                    }
+                    default:{
+                        System.out.println("  Input Error, Please Try Again!!!");
+                        break;
+                    }
+                }
+            }catch(InputMismatchException e){
+                System.out.println("  Input Error, Please Try Again!!!");
+            }
+            sc.nextLine();
+        }while(error);
     }
     
     public static void selectPO(ArrayList<PurchaseOrder> poList){
@@ -545,115 +800,149 @@ public class PurchaseOrder {
         int choice = 0;
         
         do{
-                error = true;
-                System.out.print("\n  No. Purchase Order to View: ");
-                try{
-                    choice = sc.nextInt();
-                    if(choice >= 1 && choice <= (poList.size())){
-                        error = false;
-                    }else{
-                        System.out.println("  Input Error, Please Try Again!!!");
-                    }
-                }catch(InputMismatchException e){
+            error = true;
+            System.out.print("\n  No. Purchase Order to View: ");
+            try{
+                choice = (sc.nextInt()-1);
+                if(choice >= 0 && choice < poList.size()){
+                    error = false;
+                }else{
                     System.out.println("  Input Error, Please Try Again!!!");
                 }
-                sc.nextLine();
-            }while(error); 
+            }catch(InputMismatchException e){
+                System.out.println("  Input Error, Please Try Again!!!");
+            }
+            sc.nextLine();
+        }while(error); 
         
-        showPO(poList.get(choice-1));
+        Supplier selSupp = findSupplier(poList.get(choice).getSuppID());
+        showPO(poList.get(choice), selSupp);
     }
     
     public static void showPO(PurchaseOrder po){
         Scanner sc = new Scanner(System.in);
+        
         System.out.println("\n=======================================================================================================");
         System.out.println("\t\t\t\t\t\tPurchase Order");
         System.out.println("\t\t\t\t\t    ======================");
         System.out.println("\n  Vendors : \t\t\t\t\t\t\t\t\t Purchase Order ID: ");
-        System.out.printf("  %-30s \t\t\t\t\t\t #%s", "aa", po.getOrderID());
-        System.out.printf("\n  %-20s","sss");
-        System.out.printf("\n  %s-20          \t\t\t\t\t\t\t\t Date: ", "sss");
-        System.out.printf("\n  %-6d      \t\t\t\t\t\t\t\t\t %s: ", 64000,po.getOrderDate());
+        System.out.printf("  %-30s \t\t\t\t\t\t #%s", po.getSupp().getName(), po.getOrderID());
+        System.out.printf("\n  %-20s", po.getSupp().getAddress().getAddress());
+        System.out.printf("\n  %-20s          \t\t\t\t\t\t Date: ", po.getSupp().getAddress().getCity());
+        System.out.printf("\n  %-6d      \t\t\t\t\t\t\t\t\t %s: ", po.getSupp().getAddress().getPostalCode(),po.getOrderDate());
         System.out.println("\n\n  ItemID \t Items \t\t\t Quantity \t   Unity Price \t\t Total Price");
         System.out.println("=======================================================================================================");
         
         for(int i = 0; i < po.getItemCount(); i++){
-            System.out.printf("  #%s \t %-20s \t %-3d \t\t   %-7.2f \t\t %-7.2f\n", "PO0001", po.getOrderItems().get(i).getOrdItemName(), 
-                    po.getOrderItems().get(i).getQuantity(),  2.2,po.getOrderItems().get(i).getTotalPrice());
+            System.out.printf("  #%s \t %-20s \t %-3d \t\t   %-7.2f \t\t %-7.2f\n", po.getOrderItems().get(i).getItem().getItemId(), po.getOrderItems().get(i).getItem().getItemName(), 
+                po.getOrderItems().get(i).getQuantity(),  po.getOrderItems().get(i).getUnitPrice(),po.getOrderItems().get(i).getTotalPrice());
         }
         
         System.out.println("=======================================================================================================");
         System.out.printf("          \t\t\t\t\t\t   Total(RM) : \t\t %-7.2f\n", po.getTotalPOprice());
         System.out.println("=======================================================================================================");
-        System.out.printf("\n  Status : %s\n", po.getStatus());
         
         if(po.getStatus().equals("Return")){
+            System.out.printf("\n  Status : %s\n", po.getStatus());
             System.out.println("  ====================");
             System.out.println("  Return Items : ");
             System.out.println("\n  ItemID \t Items \t\t\t Quantity \t   Unity Price \t\t Total Price");
             System.out.println("=======================================================================================================");
             
-            for(int i = 0; i < po.getItemCount(); i++){
-                System.out.printf("  #%s \t %-20s \t %-3d \t\t   %-7.2f \t\t %-7.2f\n", "PO0001", po.getOrderItems().get(i).getOrdItemName(), 
-                        po.getOrderItems().get(i).getQuantity(),  2.2,po.getOrderItems().get(i).getTotalPrice());
-            }
+//            for(int i = 0; i < po.getItemCount(); i++){
+//                System.out.printf("  #%s \t %-20s \t %-3d \t\t   %-7.2f \t\t %-7.2f\n", po.getOrderItems().get(i).getOrdItemID(), tempName, 
+//                po.getOrderItems().get(i).getQuantity(),  po.getOrderItems().get(i).getUnitPrice(),po.getOrderItems().get(i).getTotalPrice());
+//            }
             
             System.out.println("=======================================================================================================");
             System.out.printf("          \t\t\t\t\t    Return Total(RM) : \t\t %-7.2f\n", po.getTotalPOprice());
             
         }else if(po.getStatus().equals("Receive")){
+            System.out.printf("\n  Status : %s\n", po.getStatus());
             System.out.println("  ====================");
             System.out.println("  Return Items : ");
             System.out.println("\n  [None]\n");
             
+        }else{
+            System.out.printf("  Status : %s\n", po.getStatus());
+        }
+        System.out.println("=======================================================================================================");
+    }
+    
+    public static void showPO(PurchaseOrder po, Supplier supp){
+        Scanner sc = new Scanner(System.in);
+        
+        System.out.println("\n=======================================================================================================");
+        System.out.println("\t\t\t\t\t\tPurchase Order");
+        System.out.println("\t\t\t\t\t    ======================");
+        System.out.println("\n  Vendors : \t\t\t\t\t\t\t\t\t Purchase Order ID: ");
+        System.out.printf("  %-30s \t\t\t\t\t\t #%s", supp.getName(), po.getOrderID());
+        System.out.printf("\n  %-20s", supp.getAddress().getAddress());
+        System.out.printf("\n  %-20s          \t\t\t\t\t\t Date: ", supp.getAddress().getCity());
+        System.out.printf("\n  %-6d      \t\t\t\t\t\t\t\t\t %s: ", supp.getAddress().getPostalCode(),po.getOrderDate());
+        System.out.println("\n\n  ItemID \t Items \t\t\t Quantity \t   Unity Price \t\t Total Price");
+        System.out.println("=======================================================================================================");
+        
+        for(int i = 0; i < po.getItemCount(); i++){
+            String tempName = findItemName(po, i);
+            System.out.printf("  #%s \t %-20s \t %-3d \t\t   %-7.2f \t\t %-7.2f\n", po.getOrderItems().get(i).getOrdItemID(), tempName, 
+                po.getOrderItems().get(i).getQuantity(),  po.getOrderItems().get(i).getUnitPrice(),po.getOrderItems().get(i).getTotalPrice());
+        }
+        
+        System.out.println("=======================================================================================================");
+        System.out.printf("          \t\t\t\t\t\t   Total(RM) : \t\t %-7.2f\n", po.getTotalPOprice());
+        System.out.println("=======================================================================================================");
+        
+        if(po.getStatus().equals("Return")){
+            System.out.printf("\n  Status : %s\n", po.getStatus());
+            System.out.println("  ====================");
+            System.out.println("  Return Items : ");
+            System.out.println("\n  ItemID \t Items \t\t\t Quantity \t   Unity Price \t\t Total Price");
+            System.out.println("=======================================================================================================");
+            
+//            for(int i = 0; i < po.getItemCount(); i++){
+//                System.out.printf("  #%s \t %-20s \t %-3d \t\t   %-7.2f \t\t %-7.2f\n", po.getOrderItems().get(i).getOrdItemID(), tempName, 
+//                po.getOrderItems().get(i).getQuantity(),  po.getOrderItems().get(i).getUnitPrice(),po.getOrderItems().get(i).getTotalPrice());
+//            }
+            
+            System.out.println("=======================================================================================================");
+            System.out.printf("          \t\t\t\t\t    Return Total(RM) : \t\t %-7.2f\n", po.getTotalPOprice());
+            
+        }else if(po.getStatus().equals("Receive")){
+            System.out.printf("\n  Status : %s\n", po.getStatus());
+            System.out.println("  ====================");
+            System.out.println("  Return Items : ");
+            System.out.println("\n  [None]\n");
+            
+        }else{
+            System.out.printf("  Status : %s\n", po.getStatus());
         }
         System.out.println("=======================================================================================================");
         System.out.println("\n  Press Enter to continue...");
         sc.nextLine();
     }
     
-    public static void aa(){
-        Scanner sc = new Scanner(System.in);
-        boolean leave = true, error;
-        int choice;
+    public static Supplier findSupplier(String idIndex){
+        ArrayList<Supplier> supplierList = Supplier.getSupplier();
+        int supplierIndex = 0;
         
-        do{
-            do{
-                error = true;
-                try{
-                    choice = sc.nextInt();
-                    switch(choice){
-                        case 1:{
-                            error = false;
-                            break;
-                        }
-                        case 2:{
-                            error = false;
-                            leave = false;
-                            break;
-                        }
-                        default:{
-                            System.out.println("  Input Error, Please Try Again!!!");
-                            break;
-                        }
-                    }
-                }catch(InputMismatchException e){
-                    System.out.println("  Input Error, Please Try Again!!!");
-                }
-                sc.nextLine();
-            }while(error); 
-        }while(leave);
+        for(int i = 0; i < supplierList.size(); i++){
+            if(idIndex.equals(supplierList.get(i).getId())){
+                supplierIndex = i;
+            }
+        }
+        return supplierList.get(supplierIndex);
     }
     
-//    public static void clearConsole() {
-//     try {
-//            if (System.getProperty("os.name").contains("Windows")) {
-//                new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
-//            } else {
-//                System.out.print("\033[H\033[2J");
-//                System.out.flush();
-//            }
-//        } catch(Exception e) {
-//            e.printStackTrace();
-//        }  
-//    }
+    public static String findItemName(PurchaseOrder po, int index ){
+        ArrayList<Item> itemList = readNameAndIDFromItem("items.txt");
+        int itemIndex = 0;
+        
+        for(int i = 0; i < itemList.size(); i++){
+            if(po.getOrderItems().get(index).getOrdItemID().equals(itemList.get(i).getItemId())){
+                itemIndex = i;
+            }
+        }
+        return itemList.get(itemIndex).getItemName();
+    }
 }
