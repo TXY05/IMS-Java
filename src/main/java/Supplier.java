@@ -19,15 +19,14 @@ public class Supplier extends Person {
     
     private Address address;
     private String id;
+    private ArrayList<String> itemList;
 
-    
-    public Supplier(String id, String name, String email,Address address) {
+    public Supplier(String id, String name, String email, Address address, ArrayList<String> itemList) {
         super(name, email);
         this.address = address;
         this.id = id;
-    }
-
-    
+        this.itemList = itemList;
+    }    
 
     public Address getAddress() {
         return address;
@@ -47,7 +46,12 @@ public class Supplier extends Person {
             String line;
             while ((line = br.readLine()) != null) {
                 String[] row = line.split("[|]");
-                supplier.add(new Supplier(row[0],row[1],row[2],new Address(row[3],row[4],Integer.parseInt(row[5]))));
+                String[] item = row[6].split(",");
+                for(String i:item){
+                    itemList.add(i);
+                }
+                
+                supplier.add(new Supplier(row[0],row[1],row[2],new Address(row[3],row[4],Integer.parseInt(row[5])),itemList));
             }
         } catch (IOException e) {
             e.printStackTrace();
