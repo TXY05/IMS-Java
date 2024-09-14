@@ -174,15 +174,44 @@ public class Item {
 
         if (getInventory().containsKey(itemId)) {
             Item item = getInventory().get(itemId);
-            System.out.print("Enter the new name for item " + item.getItemName() + ": ");
-            String newItemName = scanner.nextLine();
-            System.out.print("Enter the new quantity for item " + item.getItemName() + ": ");
-            int newItemQuantity = scanner.nextInt();
-            scanner.nextLine();  // Consume newline
-            System.out.print("Enter the new group name for item " + item.getItemName() + ": ");
-            String newItemGroupName = scanner.nextLine();
-            ItemGroups newItemGroup = new ItemGroups(newItemGroupName);
-            item.editItemDetails(newItemName, newItemQuantity, newItemGroup);
+            boolean editing = true;
+
+            while (editing) {
+                System.out.println("\nChoose detail to edit:");
+                System.out.println("1. Name");
+                System.out.println("2. Quantity");
+                System.out.println("3. Group");
+                System.out.println("4. Done");
+                System.out.print("Enter your choice: ");
+                int choice = scanner.nextInt();
+                scanner.nextLine();  // Consume newline
+
+                switch (choice) {
+                    case 1:
+                        System.out.print("Enter the new name for item " + item.getItemName() + ": ");
+                        String newItemName = scanner.nextLine();
+                        item.itemName = newItemName;
+                        break;
+                    case 2:
+                        System.out.print("Enter the new quantity for item " + item.getItemName() + ": ");
+                        int newItemQuantity = scanner.nextInt();
+                        scanner.nextLine();  // Consume newline
+                        item.itemQuantity = newItemQuantity;
+                        break;
+                    case 3:
+                        System.out.print("Enter the new group name for item " + item.getItemName() + ": ");
+                        String newItemGroupName = scanner.nextLine();
+                        ItemGroups newItemGroup = new ItemGroups(newItemGroupName);
+                        item.itemGroup = newItemGroup;
+                        break;
+                    case 4:
+                        editing = false;
+                        break;
+                    default:
+                        System.out.println("Invalid choice. Please try again.");
+                }
+            }
+            saveInventoryToFile();  // Save changes to file
             System.out.println("Item details updated.");
         } else {
             System.out.println("Item ID not found in inventory.");
@@ -247,8 +276,10 @@ public class Item {
 
     public static void displayInventory() {
         System.out.println("\nCurrent Inventory:");
+        System.out.printf("%-10s %-20s %-10s %-20s\n", "Item ID", "Item Name", "Quantity", "Category");
+        System.out.println("===============================================================");
         for (Item item : getInventory().values()) {
-            System.out.println("ID: " + item.getItemId() + ", Name: " + item.getItemName() + ", Quantity: " + item.getItemQuantity() + ", Category: " + item.getItemGroup().getGroupName());
+            System.out.printf("%-10s %-20s %-10d %-20s\n", item.getItemId(), item.getItemName(), item.getItemQuantity(), item.getItemGroup().getGroupName());
         }
     }
 
@@ -295,7 +326,7 @@ public class Item {
     }
 
     public String generateItemId() {
-        return String.format("P%04d", idCounter.incrementAndGet());
+        return String.format("I%04d", idCounter.incrementAndGet());
     }
 
     private void addItemToInventory(Item item) {
