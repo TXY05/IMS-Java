@@ -1,6 +1,7 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Scanner;
 
 public class OrderItem {
     private Item items;
@@ -62,7 +63,7 @@ public class OrderItem {
                 }
             }
         } catch (IOException e) {
-            System.out.println("An error occurred.");
+            e.printStackTrace();
         }
     }
     
