@@ -635,10 +635,10 @@ public class PurchaseOrder {
      
     public static ArrayList<PurchaseOrder> readPOFromFile(String filename){
         ArrayList<PurchaseOrder> poList = new ArrayList<>();
-        ArrayList<OrderItem> orderList = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
             String line;
             while ((line = br.readLine()) != null) {
+                ArrayList<OrderItem> orderList = new ArrayList<>();
                 String[] parts = line.split("\\|");
                 if (parts.length == 6){
                     String poID = parts[0];
@@ -743,7 +743,7 @@ public class PurchaseOrder {
             error = true;
             System.out.println("\n  Sorting Options:");
             System.out.println("  1. PurchaseOrder ID(Asc)\n  2. PurchaseOrder ID(Dec)\n  3. Date(Asc)");
-            System.out.print("  4. Date(Dec)\n  5. Price(Asc)\n  6. Price(Dec)\n  .7 Status(Asc)\n  Please Select: ");
+            System.out.print("  4. Date(Dec)\n  5. Price(Asc)\n  6. Price(Dec)\n  7. Status(Asc)\n  Please Select: ");
             try{
                 choice = sc.nextInt();
                 switch(choice){
