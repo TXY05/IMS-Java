@@ -1,4 +1,4 @@
-I0001,Apple,30,Fruit
+I0001,Apple,20,Fruit
 I0002,Banana,30,Fruit
 I0003,Orange,20,Fruit
 I0004,Cabbage,10,Vegetable
@@ -13,4 +13,4 @@ I0012,Yogurt,20,Dairy
 I0013,Rice,60,Grains
 I0014,Bread,40,Grains
 I0015,Pasta,35,Grains
-
+I0016,Cola,20,Drinks

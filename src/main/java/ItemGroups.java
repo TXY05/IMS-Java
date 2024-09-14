@@ -14,12 +14,8 @@ public class ItemGroups {
         return groupName;
     }
 
-    public void addItemGroup(Item item) {
+    public void addItem(Item item) {
         items.add(item);
-    }
-
-    public void removeItemGroup(Item item) {
-        items.remove(item);
     }
 
     public List<Item> getItems() {
