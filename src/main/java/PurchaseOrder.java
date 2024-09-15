@@ -7,7 +7,6 @@ public class PurchaseOrder {
     private static final AtomicInteger idCounter = new AtomicInteger(0);
     private String orderID;
     private ArrayList<OrderItem> orderItems;
-    private Supplier supp;
     private String suppID;
     private LocalDate orderDate;
     private String status;
@@ -17,7 +16,7 @@ public class PurchaseOrder {
     public PurchaseOrder(ArrayList<OrderItem> orderItems, Supplier supp) {
         this.orderID = generatePOId();
         this.orderItems = orderItems;
-        this.supp = supp;
+        this.suppID = supp.getId();
         this.orderDate = LocalDate.now();
         this.status = "Pending";
         this.totalPOprice = calTotalPOprice(orderItems);
@@ -41,10 +40,6 @@ public class PurchaseOrder {
     
     public ArrayList<OrderItem> getOrderItems() {
         return orderItems;
-    }
-
-    public Supplier getSupp() {
-        return supp;
     }
     
     public String getSuppID(){
@@ -584,7 +579,7 @@ public class PurchaseOrder {
         }
         
         PurchaseOrder po = new PurchaseOrder(orderList, supp);
-        showPO(po);
+        showPO(po, supp);
         
         do{
             error = true;
@@ -615,7 +610,7 @@ public class PurchaseOrder {
     
     public static void savePOToFile(PurchaseOrder po) {
         try (BufferedWriter bw = new BufferedWriter(new FileWriter("PO.txt", true))) {
-            bw.write(po.getOrderID() + "|" +  po.getSupp().getId() + "|" + po.getOrderDate() + "|" + 
+            bw.write(po.getOrderID() + "|" +  po.getSuppID() + "|" + po.getOrderDate() + "|" + 
                     po.getStatus() + "|" + po.getTotalPOprice() + "|" + po.getItemCount());
             for (int i = 0; i < po.getItemCount(); i++){
                 bw.newLine();
@@ -817,56 +812,6 @@ public class PurchaseOrder {
         
         Supplier selSupp = findSupplier(poList.get(choice).getSuppID());
         showPO(poList.get(choice), selSupp);
-    }
-    
-    public static void showPO(PurchaseOrder po){
-        Scanner sc = new Scanner(System.in);
-        
-        System.out.println("\n=======================================================================================================");
-        System.out.println("\t\t\t\t\t\tPurchase Order");
-        System.out.println("\t\t\t\t\t    ======================");
-        System.out.println("\n  Vendors : \t\t\t\t\t\t\t\t\t Purchase Order ID: ");
-        System.out.printf("  %-30s \t\t\t\t\t\t #%s", po.getSupp().getName(), po.getOrderID());
-        System.out.printf("\n  %-20s", po.getSupp().getAddress().getAddress());
-        System.out.printf("\n  %-20s          \t\t\t\t\t\t Date: ", po.getSupp().getAddress().getCity());
-        System.out.printf("\n  %-6d      \t\t\t\t\t\t\t\t\t %s: ", po.getSupp().getAddress().getPostalCode(),po.getOrderDate());
-        System.out.println("\n\n  ItemID \t Items \t\t\t Quantity \t   Unity Price \t\t Total Price");
-        System.out.println("=======================================================================================================");
-        
-        for(int i = 0; i < po.getItemCount(); i++){
-            System.out.printf("  #%s \t %-20s \t %-3d \t\t   %-7.2f \t\t %-7.2f\n", po.getOrderItems().get(i).getItem().getItemId(), po.getOrderItems().get(i).getItem().getItemName(), 
-                po.getOrderItems().get(i).getQuantity(),  po.getOrderItems().get(i).getUnitPrice(),po.getOrderItems().get(i).getTotalPrice());
-        }
-        
-        System.out.println("=======================================================================================================");
-        System.out.printf("          \t\t\t\t\t\t   Total(RM) : \t\t %-7.2f\n", po.getTotalPOprice());
-        System.out.println("=======================================================================================================");
-        
-        if(po.getStatus().equals("Return")){
-            System.out.printf("\n  Status : %s\n", po.getStatus());
-            System.out.println("  ====================");
-            System.out.println("  Return Items : ");
-            System.out.println("\n  ItemID \t Items \t\t\t Quantity \t   Unity Price \t\t Total Price");
-            System.out.println("=======================================================================================================");
-            
-//            for(int i = 0; i < po.getItemCount(); i++){
-//                System.out.printf("  #%s \t %-20s \t %-3d \t\t   %-7.2f \t\t %-7.2f\n", po.getOrderItems().get(i).getOrdItemID(), tempName, 
-//                po.getOrderItems().get(i).getQuantity(),  po.getOrderItems().get(i).getUnitPrice(),po.getOrderItems().get(i).getTotalPrice());
-//            }
-            
-            System.out.println("=======================================================================================================");
-            System.out.printf("          \t\t\t\t\t    Return Total(RM) : \t\t %-7.2f\n", po.getTotalPOprice());
-            
-        }else if(po.getStatus().equals("Receive")){
-            System.out.printf("\n  Status : %s\n", po.getStatus());
-            System.out.println("  ====================");
-            System.out.println("  Return Items : ");
-            System.out.println("\n  [None]\n");
-            
-        }else{
-            System.out.printf("  Status : %s\n", po.getStatus());
-        }
-        System.out.println("=======================================================================================================");
     }
     
     public static void showPO(PurchaseOrder po, Supplier supp){
