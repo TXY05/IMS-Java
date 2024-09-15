@@ -15,7 +15,6 @@ public class Item {
     private ItemGroups itemGroup;  // Association with ItemGroups
     private final String itemId;
     private static final Map<String, Item> inventory = new TreeMap<>();
-
     private double unitPrice;
     private int minInvLV;
 
@@ -319,10 +318,10 @@ public class Item {
 
     private static void displayAllItems() {
         System.out.println("\nCurrent Inventory:");
-        System.out.printf("%-10s | %-20s | %-10s | %-15s | %-10s%n", "ID", "Name", "Quantity", "Category", "Min Stock");
-        System.out.println("--------------------------------------------------------------------------");
+        System.out.printf("%-10s | %-20s | %-10s | %-15s | %-10s | %-10s%n", "ID", "Name", "Quantity", "Category", "Min Stock", "Unit Price");
+        System.out.println("------------------------------------------------------------------------------------------");
         for (Item item : getInventory().values()) {
-            System.out.printf("%-10s | %-20s | %-10d | %-15s | %-10d%n", item.getItemId(), item.getItemName(), item.getItemQuantity(), item.getItemGroup().getGroupName(), item.getMinInvLV());
+            System.out.printf("%-10s | %-20s | %-10d | %-15s | %-10d | %-10.2f%n", item.getItemId(), item.getItemName(), item.getItemQuantity(), item.getItemGroup().getGroupName(), item.getMinInvLV(), item.getUnitPrice());
         }
     }
 
@@ -339,10 +338,10 @@ public class Item {
         if (groupChoice > 0 && groupChoice <= existingGroups.size()) {
             ItemGroups selectedGroup = existingGroups.get(groupChoice - 1);
             System.out.println("\nItems in group: " + selectedGroup.getGroupName());
-            System.out.printf("%-10s | %-20s | %-10s | %-15s | %-10s%n", "ID", "Name", "Quantity", "Category", "Min Stock");
-            System.out.println("--------------------------------------------------------------------------");
+            System.out.printf("%-10s | %-20s | %-10s | %-15s | %-10s | %-10s%n", "ID", "Name", "Quantity", "Category", "Min Stock", "Unit Price");
+            System.out.println("------------------------------------------------------------------------------------------");
             for (Item item : selectedGroup.getItems()) {
-                System.out.printf("%-10s | %-20s | %-10d | %-15s | %-10d%n", item.getItemId(), item.getItemName(), item.getItemQuantity(), item.getItemGroup().getGroupName(), item.getMinInvLV());
+                System.out.printf("%-10s | %-20s | %-10d | %-15s | %-10d | %-10.2f%n", item.getItemId(), item.getItemName(), item.getItemQuantity(), item.getItemGroup().getGroupName(), item.getMinInvLV(), item.getUnitPrice());
             }
         } else {
             System.out.println("Invalid group choice. Please try again.");
@@ -356,9 +355,9 @@ public class Item {
         Item item = getInventory().get(itemId);
         if (item != null) {
             System.out.println("\nItem Details:");
-            System.out.printf("%-10s | %-20s | %-10s | %-15s | %-10s%n", "ID", "Name", "Quantity", "Category", "Min Stock");
-            System.out.println("--------------------------------------------------------------------------");
-            System.out.printf("%-10s | %-20s | %-10d | %-15s | %-10d%n", item.getItemId(), item.getItemName(), item.getItemQuantity(), item.getItemGroup().getGroupName(), item.getMinInvLV());
+            System.out.printf("%-10s | %-20s | %-10s | %-15s | %-10s | %-10s%n", "ID", "Name", "Quantity", "Category", "Min Stock", "Unit Price");
+            System.out.println("------------------------------------------------------------------------------------------");
+            System.out.printf("%-10s | %-20s | %-10d | %-15s | %-10d | %-10.2f%n", item.getItemId(), item.getItemName(), item.getItemQuantity(), item.getItemGroup().getGroupName(), item.getMinInvLV(), item.getUnitPrice());
 
             System.out.print("\nDo you want to change the item details? (y/n): ");
             String response = scanner.nextLine();
