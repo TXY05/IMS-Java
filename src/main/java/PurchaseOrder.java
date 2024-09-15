@@ -62,6 +62,10 @@ public class PurchaseOrder {
         return itemCount;
     }
     
+    public void setStatus(String status){
+        this.status = status;
+    }
+    
     public String generatePOId() {
         ArrayList<PurchaseOrder> poList = readPOFromFile("PO.txt");
         
