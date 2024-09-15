@@ -310,7 +310,7 @@ public class PurchaseOrder {
             System.out.println("  Available Items:");
             System.out.println("=======================================================================================================");
             for(int i = 0; i < orderList.size(); i++){
-                System.out.printf("  %2d. %s\n", (i+1), orderList.get(i).getItem().getItemName());
+                System.out.printf("  %2d. %s\n", (i+1), orderList.get(i).getOrdItemName());
             }
             
             listOrdItems(orderList);
@@ -412,7 +412,7 @@ public class PurchaseOrder {
         
         for (int i = 0; i < orderList.size(); i++){
             if(orderList.get(i).getQuantity() != 0){
-                System.out.printf("  %2d. \t %-20s \t %d \t\t   %-8.2f \t\t %-8.2f\n" , noCount, orderList.get(i).getItem().getItemName(), orderList.get(i).getQuantity(),
+                System.out.printf("  %2d. \t %-20s \t %d \t\t   %-8.2f \t\t %-8.2f\n" , noCount, orderList.get(i).getOrdItemName(), orderList.get(i).getQuantity(),
                     orderList.get(i).getUnitPrice(), orderList.get(i).getTotalPrice());
                 display = false;
                 noCount++;
@@ -614,7 +614,7 @@ public class PurchaseOrder {
                     po.getStatus() + "|" + po.getTotalPOprice() + "|" + po.getItemCount());
             for (int i = 0; i < po.getItemCount(); i++){
                 bw.newLine();
-                bw.write(po.getOrderItems().get(i).getItem().getItemId() + "|" + po.getOrderItems().get(i).getQuantity() + "|" +
+                bw.write(po.getOrderItems().get(i).getOrdItemID() + "|" + po.getOrderItems().get(i).getQuantity() + "|" +
                         po.getOrderItems().get(i).getUnitPrice());
             }
             bw.newLine();

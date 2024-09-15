@@ -1,13 +1,14 @@
 public class OrderItem {
-    private Item items;
     private String ordItemID;
+    private String ordItemName;
     private int quantity;
     private double unitPrice;
     private double totalPrice;
     
     // for saving
     public OrderItem(Item items){
-        this.items = items;
+        this.ordItemID = items.getItemId();
+        this.ordItemName = items.getItemName();
         this.quantity = 0;
         this.unitPrice = 0.0;
         this.totalPrice = 0.0;
@@ -21,12 +22,12 @@ public class OrderItem {
         this.totalPrice = getTotalPrice(unitPrice, quantity);
     }
     
-    public Item getItem(){
-        return items;
-    }
-    
     public String getOrdItemID(){
         return ordItemID;
+    }
+    
+    public String getOrdItemName(){
+        return ordItemName;
     }
     
     public int getQuantity(){
