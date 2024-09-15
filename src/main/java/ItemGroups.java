@@ -2,8 +2,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ItemGroups {
-    private String groupName;
-    private List<Item> items;
+    private final String groupName;
+    private final List<Item> items;
 
     public ItemGroups(String groupName) {
         this.groupName = groupName;

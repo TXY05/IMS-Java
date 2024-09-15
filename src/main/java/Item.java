@@ -16,8 +16,7 @@ public class Item {
     private final String itemId;
     private static final Map<String, Item> inventory = new TreeMap<>();
 
-    private double buyPrice;
-    private int maxInvLV;
+    private double unitPrice;
     private int minInvLV;
 
     public static void main(String[] args) {
@@ -25,19 +24,19 @@ public class Item {
     }
 
     // Constructors
-    public Item(String itemName, int itemQuantity, ItemGroups itemGroup) {
+    public Item(String itemName, int itemQuantity, ItemGroups itemGroup, int minInvLV) {
         this.itemName = itemName;
         this.itemQuantity = itemQuantity;
         this.itemGroup = itemGroup;
+        this.minInvLV = minInvLV;
         this.itemId = generateItemId();  // Automatically generate ID
         getInventory().put(this.itemId, this);  // Add item to inventory
         itemGroup.addItem(this);  // Add item to group
     }
 
-    public Item(String name, int quantity, ItemGroups groupName, double buyPrice, int maxInvLV, int minInvLV) {
-        this(name, quantity, groupName);
-        this.buyPrice = buyPrice;
-        this.maxInvLV = maxInvLV;
+    public Item(String name, int quantity, ItemGroups groupName, double unitPrice, int minInvLV) {
+        this(name, quantity, groupName, minInvLV);
+        this.unitPrice = unitPrice;
         this.minInvLV = minInvLV;
     }
 
@@ -75,20 +74,20 @@ public class Item {
         this.itemGroup = itemGroup;
     }
 
-    public double getBuyPrice() {
-        return buyPrice;
+    public double getUnitPrice() {
+        return unitPrice;
     }
 
-    public void setBuyPrice(double buyPrice) {
-        this.buyPrice = buyPrice;
-    }
-
-    public int getMaxInvLV() {
-        return maxInvLV;
+    public void setUnitPrice(double unitPrice) {
+        this.unitPrice = unitPrice;
     }
 
     public int getMinInvLV() {
         return minInvLV;
+    }
+
+    public void setMinInvLV(int minInvLV) {
+        this.minInvLV = minInvLV;
     }
 
     public boolean isInStock() {
@@ -96,29 +95,6 @@ public class Item {
     }
 
     // Methods
-    public void addItemQuantity(int quantityToAdd) {
-        if (getInventory().containsKey(this.itemId)) {
-            Item item = getInventory().get(this.itemId);
-            item.itemQuantity += quantityToAdd;
-        } else {
-            this.itemQuantity += quantityToAdd;
-            getInventory().put(this.itemId, this);
-        }
-    }
-
-    public void removeItemQuantity(int quantityToRemove) {
-        if (getInventory().containsKey(this.itemId)) {
-            Item item = getInventory().get(this.itemId);
-            if (item.itemQuantity >= quantityToRemove) {
-                item.itemQuantity -= quantityToRemove;
-            } else {
-                System.out.println("Not enough quantity to remove.");
-            }
-        } else {
-            System.out.println("Item ID not found in inventory.");
-        }
-    }
-
     public void editItemDetails(String newItemName, int newItemQuantity, ItemGroups newItemGroup) {
         this.itemName = newItemName;
         this.itemQuantity = newItemQuantity;
@@ -135,7 +111,7 @@ public class Item {
         String fileName = "items.txt";
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
             for (Item item : getInventory().values()) {
-                writer.write(item.getItemId() + "," + item.getItemName() + "," + item.getItemQuantity() + "," + item.getItemGroup().getGroupName());
+                writer.write(item.getItemId() + "," + item.getItemName() + "," + item.getItemQuantity() + "," + item.getItemGroup().getGroupName() + "," + item.getMinInvLV());
                 writer.newLine();
             }
         } catch (IOException e) {
@@ -150,13 +126,14 @@ public class Item {
             Map<String, ItemGroups> groupMap = new TreeMap<>();
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split(",");
-                if (parts.length == 4) {
+                if (parts.length == 5) {  // Adjusted to 5 to include minInvLV
                     String itemId = parts[0];
                     String itemName = parts[1];
                     int itemQuantity = Integer.parseInt(parts[2]);
                     String groupName = parts[3];
+                    int minInvLV = Integer.parseInt(parts[4]);
                     ItemGroups itemGroup = groupMap.computeIfAbsent(groupName, ItemGroups::new);
-                    Item item = new Item(itemName, itemQuantity, itemGroup);
+                    Item item = new Item(itemName, itemQuantity, itemGroup, minInvLV);  // Use the correct constructor
                     getInventory().put(itemId, item);
                 }
             }
@@ -189,6 +166,11 @@ public class Item {
 
         Item item = getInventory().get(itemId);
         if (item != null) {
+            System.out.println("\nItem Details:");
+            System.out.printf("%-10s | %-20s | %-10s | %-15s%n", "ID", "Name", "Quantity", "Category");
+            System.out.println("-------------------------------------------------------------");
+            System.out.printf("%-10s | %-20s | %-10d | %-15s%n", item.getItemId(), item.getItemName(), item.getItemQuantity(), item.getItemGroup().getGroupName());
+
             boolean editing = true;
             while (editing) {
                 System.out.println("\nEditing item: " + item.getItemName());
@@ -202,24 +184,31 @@ public class Item {
 
                 switch (choice) {
                     case 1:
-                        System.out.print("Enter the new name for item " + item.getItemName() + ": ");
-                        String newItemName = scanner.nextLine();
-                        item.setItemName(newItemName);
-                        System.out.println("Item name updated.");
+                        System.out.print("Enter new name: ");
+                        String newName = scanner.nextLine();
+                        item.setItemName(newName);
                         break;
                     case 2:
-                        System.out.print("Enter the new quantity for item " + item.getItemName() + ": ");
-                        int newItemQuantity = scanner.nextInt();
+                        System.out.print("Enter new quantity: ");
+                        int newQuantity = scanner.nextInt();
                         scanner.nextLine();  // Consume newline
-                        item.setItemQuantity(newItemQuantity);
-                        System.out.println("Item quantity updated.");
+                        item.setItemQuantity(newQuantity);
                         break;
                     case 3:
-                        System.out.print("Enter the new group name for item " + item.getItemName() + ": ");
-                        String newItemGroupName = scanner.nextLine();
-                        ItemGroups newItemGroup = new ItemGroups(newItemGroupName);
-                        item.setItemGroup(newItemGroup);
-                        System.out.println("Item group updated.");
+                        System.out.println("Existing item groups:");
+                        List<ItemGroups> existingGroups = getExistingItemGroups();
+                        for (int i = 0; i < existingGroups.size(); i++) {
+                            System.out.println((i + 1) + ". " + existingGroups.get(i).getGroupName());
+                        }
+                        System.out.print("Choose a new group: ");
+                        int groupChoice = scanner.nextInt();
+                        scanner.nextLine();  // Consume newline
+                        if (groupChoice > 0 && groupChoice <= existingGroups.size()) {
+                            ItemGroups newGroup = existingGroups.get(groupChoice - 1);
+                            item.setItemGroup(newGroup);
+                        } else {
+                            System.out.println("Invalid group choice.");
+                        }
                         break;
                     case 4:
                         editing = false;
@@ -228,9 +217,16 @@ public class Item {
                         System.out.println("Invalid choice. Please try again.");
                 }
             }
+            saveInventoryToFile();  // Save changes to file
+            removeEmptyGroups();  // Remove empty groups
         } else {
             System.out.println("Item ID not found in inventory.");
         }
+    }
+
+    private static void removeEmptyGroups() {
+        List<ItemGroups> existingGroups = getExistingItemGroups();
+        existingGroups.removeIf(group -> group.getItems().isEmpty());
     }
 
     public static void promptUserToAddNewItem() {
@@ -241,6 +237,10 @@ public class Item {
 
         System.out.print("Enter the item quantity: ");
         int itemQuantity = scanner.nextInt();
+        scanner.nextLine();  // Consume newline
+
+        System.out.print("Enter the minimum stock level: ");
+        int minInvLV = scanner.nextInt();
         scanner.nextLine();  // Consume newline
 
         // Display existing item groups
@@ -266,7 +266,7 @@ public class Item {
         }
 
         // Create a new Item object
-        Item newItem = new Item(itemName, itemQuantity, itemGroup);
+        Item newItem = new Item(itemName, itemQuantity, itemGroup, minInvLV);
 
         // Add the new item to the inventory
         getInventory().put(newItem.getItemId(), newItem);
@@ -276,7 +276,6 @@ public class Item {
 
         System.out.println("New item added successfully.");
     }
-
     public static List<ItemGroups> getExistingItemGroups() {
         // Collect all unique item groups from the inventory
         Set<String> groupNamesSet = new HashSet<>();
@@ -317,10 +316,10 @@ public class Item {
 
     private static void displayAllItems() {
         System.out.println("\nCurrent Inventory:");
-        System.out.printf("%-10s | %-20s | %-10s | %-15s%n", "ID", "Name", "Quantity", "Category");
-        System.out.println("-------------------------------------------------------------");
+        System.out.printf("%-10s | %-20s | %-10s | %-15s | %-10s%n", "ID", "Name", "Quantity", "Category", "Min Stock");
+        System.out.println("--------------------------------------------------------------------------");
         for (Item item : getInventory().values()) {
-            System.out.printf("%-10s | %-20s | %-10d | %-15s%n", item.getItemId(), item.getItemName(), item.getItemQuantity(), item.getItemGroup().getGroupName());
+            System.out.printf("%-10s | %-20s | %-10d | %-15s | %-10d%n", item.getItemId(), item.getItemName(), item.getItemQuantity(), item.getItemGroup().getGroupName(), item.getMinInvLV());
         }
     }
 
@@ -337,10 +336,10 @@ public class Item {
         if (groupChoice > 0 && groupChoice <= existingGroups.size()) {
             ItemGroups selectedGroup = existingGroups.get(groupChoice - 1);
             System.out.println("\nItems in group: " + selectedGroup.getGroupName());
-            System.out.printf("%-10s | %-20s | %-10s | %-15s%n", "ID", "Name", "Quantity", "Category");
-            System.out.println("-------------------------------------------------------------");
+            System.out.printf("%-10s | %-20s | %-10s | %-15s | %-10s%n", "ID", "Name", "Quantity", "Category", "Min Stock");
+            System.out.println("--------------------------------------------------------------------------");
             for (Item item : selectedGroup.getItems()) {
-                System.out.printf("%-10s | %-20s | %-10d | %-15s%n", item.getItemId(), item.getItemName(), item.getItemQuantity(), item.getItemGroup().getGroupName());
+                System.out.printf("%-10s | %-20s | %-10d | %-15s | %-10d%n", item.getItemId(), item.getItemName(), item.getItemQuantity(), item.getItemGroup().getGroupName(), item.getMinInvLV());
             }
         } else {
             System.out.println("Invalid group choice. Please try again.");
@@ -354,9 +353,9 @@ public class Item {
         Item item = getInventory().get(itemId);
         if (item != null) {
             System.out.println("\nItem Details:");
-            System.out.printf("%-10s | %-20s | %-10s | %-15s%n", "ID", "Name", "Quantity", "Category");
-            System.out.println("-------------------------------------------------------------");
-            System.out.printf("%-10s | %-20s | %-10d | %-15s%n", item.getItemId(), item.getItemName(), item.getItemQuantity(), item.getItemGroup().getGroupName());
+            System.out.printf("%-10s | %-20s | %-10s | %-15s | %-10s%n", "ID", "Name", "Quantity", "Category", "Min Stock");
+            System.out.println("--------------------------------------------------------------------------");
+            System.out.printf("%-10s | %-20s | %-10d | %-15s | %-10d%n", item.getItemId(), item.getItemName(), item.getItemQuantity(), item.getItemGroup().getGroupName(), item.getMinInvLV());
 
             System.out.print("\nDo you want to change the item details? (y/n): ");
             String response = scanner.nextLine();
@@ -377,7 +376,8 @@ public class Item {
             System.out.println("1. Edit Name");
             System.out.println("2. Edit Quantity");
             System.out.println("3. Edit Group");
-            System.out.println("4. Exit");
+            System.out.println("4. Edit Min Stock Level");
+            System.out.println("5. Exit");
             System.out.print("Choose an option: ");
             int choice = scanner.nextInt();
             scanner.nextLine();  // Consume newline
@@ -413,12 +413,57 @@ public class Item {
                     }
                     break;
                 case 4:
+                    System.out.print("Enter new minimum stock level: ");
+                    int newMinInvLV = scanner.nextInt();
+                    item.setMinInvLV(newMinInvLV);
+                    break;
+                case 5:
                     editing = false;
                     break;
                 default:
                     System.out.println("Invalid choice. Please try again.");
             }
             saveInventoryToFile();  // Save changes to file
+        }
+    }
+
+    public static void promptUserToEditMinStockLevel() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("\nEnter the item ID: ");
+        String itemId = scanner.nextLine();
+
+        Item item = getInventory().get(itemId);
+        if (item != null) {
+            System.out.println("Current minimum stock level for " + item.getItemName() + ": " + item.getMinInvLV());
+            System.out.print("Enter the new minimum stock level: ");
+            int newMinInvLV = scanner.nextInt();
+            item.setMinInvLV(newMinInvLV);
+            System.out.println("New minimum stock level for " + item.getItemName() + ": " + item.getMinInvLV());
+            saveInventoryToFile();  // Save changes to file
+        } else {
+            System.out.println("Item ID not found in inventory.");
+        }
+    }
+
+    // Add this method to the Item class
+    public static void promptUserToDeleteItem() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("\nEnter the item ID to delete: ");
+        String itemId = scanner.nextLine();
+
+        Item item = getInventory().get(itemId);
+        if (item != null) {
+            // Remove the item from the group
+            item.getItemGroup().getItems().remove(item);
+            // Remove the item from the inventory
+            getInventory().remove(itemId);
+            // Save the updated inventory to the file
+            saveInventoryToFile();
+            System.out.println("Item " + item.getItemName() + " deleted successfully.");
+            // Remove empty groups
+            removeEmptyGroups();
+        } else {
+            System.out.println("Item ID not found in inventory.");
         }
     }
 
@@ -434,26 +479,34 @@ public class Item {
             System.out.println("1. Add New Item");
             System.out.println("2. Edit Item Quantity");
             System.out.println("3. Edit Item Details");
-            System.out.println("4. Display Inventory");
-            System.out.println("5. Exit");
+            System.out.println("4. Edit Min Stock Level");
+            System.out.println("5. Display Inventory");
+            System.out.println("6. Delete Item");
+            System.out.println("7. Exit");
             System.out.print("Choose an option: ");
             int choice = scanner.nextInt();
             scanner.nextLine();
 
             switch (choice) {
                 case 1:
-                    promptUserToAddNewItem();
+                    promptUserToAddNewItem(); // Add New Item
                     break;
                 case 2:
-                    promptUserToEditItemQuantity();
+                    promptUserToEditItemQuantity(); // Edit Item Quantity
                     break;
                 case 3:
-                    promptUserToEditItemDetails();
+                    promptUserToEditItemDetails(); // Edit Item Details
                     break;
                 case 4:
-                    displayInventory();
+                    promptUserToEditMinStockLevel(); // Edit Min Stock Level
                     break;
                 case 5:
+                    displayInventory(); // Display inventory
+                    break;
+                case 6:
+                    promptUserToDeleteItem(); // Delete Item
+                    break;
+                case 7:
                     saveInventoryToFile(); // Save inventory to file before exiting
                     exit = true;
                     break;
