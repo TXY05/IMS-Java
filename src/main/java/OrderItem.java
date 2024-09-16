@@ -1,5 +1,5 @@
 public class OrderItem {
-    private String ordItemID;
+    private final String ordItemID;
     private String ordItemName;
     private int quantity;
     private double unitPrice;
