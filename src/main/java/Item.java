@@ -37,6 +37,15 @@ public class Item {
         this.itemId = itemId;
         this.itemName = itemName;
     }
+    
+    //For Saving Item Array List
+    public Item(String itemId, String itemName, int itemQuantity, ItemGroups itemGroup, int minInvLV) {
+        this.itemId = itemId;
+        this.itemName = itemName;
+        this.itemQuantity = itemQuantity;
+        this.itemGroup = itemGroup;
+        this.minInvLV = minInvLV;
+    }
 
     // Getters and Setters
     public String getItemName() {
