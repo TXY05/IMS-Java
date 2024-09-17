@@ -208,10 +208,12 @@ public class GoodsReceive {
                         Item.addItemQty(goodsReceive.getOrderItems().get(i).getOrdItemID(), goodsReceive.getOrderItems().get(i).getQuantity());
                     }
                     System.out.println("Successfully Received.");
+                    IMS.systemPause();
                     invalid = false;
                 }
                 case "N" -> { //If no
                     System.out.println("Order not received.");
+                    IMS.systemPause();
                     invalid = false; //Exit
                 }
                 default -> {
