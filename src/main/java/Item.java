@@ -44,6 +44,9 @@ public class Item {
     }
 
     public void setItemName(String itemName) {
+        if (itemName.length() > 20) {
+            throw new IllegalArgumentException("Item name cannot be more than 20 characters.");
+        }
         this.itemName = itemName;
     }
 
@@ -52,6 +55,9 @@ public class Item {
     }
 
     public void setItemQuantity(int itemQuantity) {
+        if (itemQuantity < 0) {
+            throw new IllegalArgumentException("Item quantity cannot be negative.");
+        }
         this.itemQuantity = itemQuantity;
     }
 
@@ -64,6 +70,9 @@ public class Item {
     }
 
     public void setItemGroup(ItemGroups itemGroup) {
+        if (itemGroup.getGroupName().length() > 20) {
+            throw new IllegalArgumentException("Item group name cannot be more than 20 characters.");
+        }
         this.itemGroup = itemGroup;
     }
 
@@ -72,6 +81,9 @@ public class Item {
     }
 
     public void setUnitPrice(double unitPrice) {
+        if (unitPrice > 1000) {
+            throw new IllegalArgumentException("Unit price cannot be more than 1000.");
+        }
         this.unitPrice = unitPrice;
     }
 
@@ -80,6 +92,9 @@ public class Item {
     }
 
     public void setMinInvLV(int minInvLV) {
+        if (minInvLV < 0) {
+            throw new IllegalArgumentException("Minimum inventory level cannot be negative.");
+        }
         this.minInvLV = minInvLV;
     }
 
@@ -258,7 +273,7 @@ public class Item {
             return;
         }
 
-        System.out.println("Existing item groups:");
+        System.out.println("\nExisting item groups:");
         List<ItemGroups> existingGroups = getExistingItemGroups();
         for (int i = 0; i < existingGroups.size(); i++) {
             System.out.println((i + 1) + ". " + existingGroups.get(i).getGroupName());
@@ -433,13 +448,16 @@ public class Item {
                     for (int i = 0; i < existingGroups.size(); i++) {
                         System.out.println((i + 1) + ". " + existingGroups.get(i).getGroupName());
                     }
-                    System.out.print("Choose a new group: ");
+                    System.out.println((existingGroups.size() + 1) + ". Create new group");
+
+                    System.out.print("Choose an option: ");
                     String groupChoiceInput = scanner.nextLine();
                     if (groupChoiceInput.equalsIgnoreCase("e")) return;
                     int groupChoice = Integer.parseInt(groupChoiceInput);
+
                     if (groupChoice > 0 && groupChoice <= existingGroups.size()) {
                         item.setItemGroup(existingGroups.get(groupChoice - 1));
-                    } else {
+                    } else if (groupChoice == existingGroups.size() + 1) {
                         System.out.print("Enter the new group name: ");
                         String groupName = scanner.nextLine();
                         if (groupName.equalsIgnoreCase("e")) return;
@@ -450,6 +468,8 @@ public class Item {
                             existingGroups.add(newGroup);
                             item.setItemGroup(newGroup);
                         }
+                    } else {
+                        System.out.println("Invalid choice. Please try again.");
                     }
                     break;
                 case 4:
@@ -588,7 +608,7 @@ public class Item {
         return String.format("I%04d", idCounter.incrementAndGet());
     }
     
-    //Add quantity after receving order
+    //Add quantity after receiving order
     public static void addItemQty(String restockID, int restockQty){
         ArrayList<Item> tempItem = GoodsReceive.readAndSaveItem("items.txt");
         int index = 0;
