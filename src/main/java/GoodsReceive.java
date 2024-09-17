@@ -13,13 +13,21 @@ public class GoodsReceive {
 
     public static void GoodsMenu() {
         Scanner sc = new Scanner(System.in);
-        ArrayList<PurchaseOrder> goodsReceive = PurchaseOrder.readPOFromFile("PO.txt");
         int choice = 0;
-        int max = goodsReceive.size();
         boolean invalid;
         boolean leave = false;
 
         while (!leave) {
+            ArrayList<PurchaseOrder> goodsReceive = PurchaseOrder.readPOFromFile("PO.txt");
+            int max = goodsReceive.size();
+            
+            for(int i = max -1; i >= 0; i--){
+                if(goodsReceive.get(i).getStatus().equals("Receive") ||
+                        goodsReceive.get(i).getStatus().equals("Return")){
+                    goodsReceive.remove(i);
+                }
+            }
+            max = goodsReceive.size();
             displayGoodReceive(goodsReceive);
 
             do {
