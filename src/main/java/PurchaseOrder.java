@@ -1,7 +1,12 @@
 import java.io.*;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.crypto.NoSuchPaddingException;
 
 public class PurchaseOrder {
     private static final AtomicInteger idCounter = new AtomicInteger(0);
@@ -218,7 +223,16 @@ public class PurchaseOrder {
     }
     
     public static Supplier selectedSupp(ArrayList<OrderItem> orderList){
-        ArrayList<Supplier> ListSupplier = Supplier.getSupplier();
+        ArrayList<Supplier> ListSupplier = null;
+        try {
+            ListSupplier = Supplier.getSupplier();
+        } catch (NoSuchAlgorithmException ex) {
+            Logger.getLogger(PurchaseOrder.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NoSuchPaddingException ex) {
+            Logger.getLogger(PurchaseOrder.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InvalidKeyException ex) {
+            Logger.getLogger(PurchaseOrder.class.getName()).log(Level.SEVERE, null, ex);
+        }
         ArrayList<Item> itemList = readNameAndIDFromItem("items.txt");
         
         Scanner sc = new Scanner(System.in);
@@ -678,7 +692,16 @@ public class PurchaseOrder {
     public static void poHistory(){
         Scanner sc = new Scanner(System.in);
         ArrayList<PurchaseOrder> poList = readPOFromFile("PO.txt");
-        ArrayList<Supplier> ListSupplier = Supplier.getSupplier();
+        ArrayList<Supplier> ListSupplier = null;
+        try {
+            ListSupplier = Supplier.getSupplier();
+        } catch (NoSuchAlgorithmException ex) {
+            Logger.getLogger(PurchaseOrder.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NoSuchPaddingException ex) {
+            Logger.getLogger(PurchaseOrder.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InvalidKeyException ex) {
+            Logger.getLogger(PurchaseOrder.class.getName()).log(Level.SEVERE, null, ex);
+        }
         boolean leave = true, error;
         int choice;
         String tempSuppName = "";
@@ -884,7 +907,16 @@ public class PurchaseOrder {
     }
     
     public static Supplier findSupplier(String idIndex){
-        ArrayList<Supplier> supplierList = Supplier.getSupplier();
+        ArrayList<Supplier> supplierList = null;
+        try {
+            supplierList = Supplier.getSupplier();
+        } catch (NoSuchAlgorithmException ex) {
+            Logger.getLogger(PurchaseOrder.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NoSuchPaddingException ex) {
+            Logger.getLogger(PurchaseOrder.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InvalidKeyException ex) {
+            Logger.getLogger(PurchaseOrder.class.getName()).log(Level.SEVERE, null, ex);
+        }
         int supplierIndex = 0;
         
         for(int i = 0; i < supplierList.size(); i++){

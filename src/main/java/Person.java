@@ -1,3 +1,8 @@
+
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import javax.crypto.NoSuchPaddingException;
+
 public abstract class Person {
 
     private String name;
@@ -33,7 +38,7 @@ public abstract class Person {
         return "Person{" + "name=" + name + ", email=" + email + '}';
     }
     
-    public abstract void encryption();
-    public abstract void decryption();
+    public abstract String encryption (String line)throws NoSuchAlgorithmException,NoSuchPaddingException,InvalidKeyException;
+    public abstract String decryption(String line)throws NoSuchAlgorithmException,NoSuchPaddingException,InvalidKeyException;
     
 }

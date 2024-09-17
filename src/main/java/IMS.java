@@ -12,16 +12,17 @@ public class IMS {
 
     public static void main(String[] args) throws FileNotFoundException, IOException {
         Scanner scanner = new Scanner(System.in);
-        boolean login, signup;
+        boolean endProgram=false;
         int choice = 0;
                 
         User user = new User();
 
         do {
             header();
-            System.out.println("main menu");
+            System.out.println("Main Menu");
             System.out.println("1.Login");
             System.out.println("2.Signup");
+            System.out.println("3.Exit Program");
             System.out.print("Enter your choice > ");
             try {
                 choice = scanner.nextInt();
@@ -30,30 +31,55 @@ public class IMS {
                 System.out.println("Invalid input. Please enter a valid integer.");
                 scanner.next();  // Clear the invalid input from the scanner buffer
             }
+            
             switch (choice) {
                 case 1:
-                    login = user.login();
-                    if (login) {
-                        System.out.println("Login success");
-                    } else {
-                        System.out.println("Login fail");
+                    endProgram = user.login();
+                    if (!endProgram) {
+                        System.out.println("\nLogin Failed! Please try again later!");
+                        System.out.println("Press Enter to Continue...");
+                        scanner.nextLine();
+                        scanner.nextLine();
+                    } else{
+                        System.out.println("\nLogin Success!");
+                        System.out.println("Press Enter to Continue...");
+                        scanner.nextLine();
+                        scanner.nextLine();
                     }
                     break;
                 case 2:
-                    signup = user.signup();
-                    if (signup) {
-                        System.out.println("Signup success");
-                    } else {
-                        System.out.println("Signup fail");
+                    endProgram = user.signup();
+                    if (!endProgram) {
+                        System.out.println("\nRegister Failed! Please try again later!");
+                        System.out.println("Press Enter to Continue...");
+                        scanner.nextLine();
+                        scanner.nextLine();
+                    } else{
+                        System.out.println("\nRegister Success!");
+                        System.out.println("Press Enter to Continue...");
+                        scanner.nextLine();
+                        scanner.nextLine();
                     }
                     break;
+                case 3:
+                    System.out.println("Program exitting...");
+                    System.exit(0);
                 default:
                     System.out.println("Invalid input.");
             }
             clearConsole();
-        } while (choice < 1 || choice > 2);
+        } while (choice !=3);
 
     }
+    
+    public static void dashboard(){
+        header();
+        //lowLevelStock
+        //viewItem
+        //viewPO
+        //goodreturn
+    }
+    
 
     public static void line() {
         System.out.println("==========================================================================================================");
