@@ -6,6 +6,28 @@ import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class GoodsReturn {
+
+    private final String orderID;
+    private final ArrayList<OrderItem> orderItems;
+    private final int itemCount;
+    
+    public GoodsReturn(String orderID, ArrayList<OrderItem> orderItems, int itemCount){
+        this.orderID = orderID;
+        this.orderItems = orderItems;
+        this.itemCount = itemCount;
+    }
+
+    public String getOrderID() {
+        return orderID;
+    }
+
+    public ArrayList<OrderItem> getOrderItems() {
+        return orderItems;
+    }
+
+    public int getItemCount() {
+        return itemCount;
+    }
     
     public static void goodsReturnMenu(PurchaseOrder goodsReturn){
         Scanner sc = new Scanner(System.in);

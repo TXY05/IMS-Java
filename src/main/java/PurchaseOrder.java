@@ -843,19 +843,33 @@ public class PurchaseOrder {
         System.out.println("=======================================================================================================");
         
         if(po.getStatus().equals("Return")){
+            ArrayList<GoodsReturn> goodsReturn = readGoodsReturn("GoodsReturn.txt");
+            int index = 0;
+            double totalPOPrice;
+            
             System.out.printf("\n  Status : %s\n", po.getStatus());
             System.out.println("  ====================");
             System.out.println("  Return Items : ");
             System.out.println("\n  ItemID \t Items \t\t\t Quantity \t   Unity Price \t\t Total Price");
             System.out.println("=======================================================================================================");
             
+            for(GoodsReturn gr : goodsReturn){
+                if(gr.getOrderID().equals(po.getOrderID())){
+                    for(int i = 0; i < gr.getItemCount(); i++){
+                        String tempName = findItemName(gr, i);
+                        System.out.printf("  #%s \t %-20s \t %-3d \t\t   %-7.2f \t\t %-7.2f\n", gr.getOrderItems().get(i).getOrdItemID(), tempName, 
+                        gr.getOrderItems().get(i).getQuantity(),  gr.getOrderItems().get(i).getUnitPrice(), gr.getOrderItems().get(i).getTotalPrice());
+                    }
+                }
+                index++;
+            }
 //            for(int i = 0; i < po.getItemCount(); i++){
 //                System.out.printf("  #%s \t %-20s \t %-3d \t\t   %-7.2f \t\t %-7.2f\n", po.getOrderItems().get(i).getOrdItemID(), tempName, 
 //                po.getOrderItems().get(i).getQuantity(),  po.getOrderItems().get(i).getUnitPrice(),po.getOrderItems().get(i).getTotalPrice());
 //            }
-            
+            totalPOPrice = po.calTotalPOprice(goodsReturn.get(index -1).getOrderItems());
             System.out.println("=======================================================================================================");
-            System.out.printf("          \t\t\t\t\t    Return Total(RM) : \t\t %-7.2f\n", po.getTotalPOprice());
+            System.out.printf("          \t\t\t\t\t    Return Total(RM) : \t\t %-7.2f\n", totalPOPrice);
             
         }else if(po.getStatus().equals("Receive")){
             System.out.printf("\n  Status : %s\n", po.getStatus());
@@ -893,5 +907,53 @@ public class PurchaseOrder {
             }
         }
         return itemList.get(itemIndex).getItemName();
+    }
+    
+    //Method Overloading for GoodsReturn
+    public static String findItemName(GoodsReturn po, int index ){
+        ArrayList<Item> itemList = readNameAndIDFromItem("items.txt");
+        int itemIndex = 0;
+        
+        for(int i = 0; i < itemList.size(); i++){
+            if(po.getOrderItems().get(index).getOrdItemID().equals(itemList.get(i).getItemId())){
+                itemIndex = i;
+            }
+        }
+        return itemList.get(itemIndex).getItemName();
+    }
+    
+    public static ArrayList<GoodsReturn> readGoodsReturn(String fileName){
+        ArrayList<GoodsReturn> returnList = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                ArrayList<OrderItem> orderList = new ArrayList<>();
+                String[] parts = line.split("\\|");
+                if (parts.length == 2){
+                    String poID = parts[0];
+                    int itemCount = Integer.parseInt(parts[1]);
+                
+                    for(int i = 0; i < itemCount; i++){
+                        line = br.readLine();
+                        String[] part = line.split("\\|");
+                        if (part.length == 3){
+                            String itemID = part[0];
+                            int returnQty = Integer.parseInt(part[1]);
+                            double unitPrice = Double.parseDouble(part[2]);
+                            OrderItem ordItem = new OrderItem(itemID, returnQty, unitPrice);
+                            orderList.add(ordItem);
+                        }
+                    }
+                    GoodsReturn gr = new GoodsReturn(poID, orderList, itemCount);
+                    returnList.add(gr);
+                }
+            }
+        } catch (FileNotFoundException e){
+            System.out.println("  File Not Found !!!");
+        } catch (IOException e) {
+            System.out.println("  Something Went Wrong !!!");
+            System.exit(1);
+        }
+        return returnList;
     }
 }
