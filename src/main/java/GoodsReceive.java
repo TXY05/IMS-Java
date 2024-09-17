@@ -12,7 +12,7 @@ import java.util.TreeMap;
 public class GoodsReceive {
     
     //Display Menu After Choosing Goods Receive Option
-    public static void GoodsMenu() {
+    public static void goodsMenu() {
         Scanner sc = new Scanner(System.in);
         boolean invalid;
         boolean leave = false;
