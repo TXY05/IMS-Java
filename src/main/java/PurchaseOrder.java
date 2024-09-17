@@ -12,7 +12,8 @@ public class PurchaseOrder {
     private String status;
     private double totalPOprice;
     private int itemCount;
-
+    
+    // for saving
     public PurchaseOrder(ArrayList<OrderItem> orderItems, Supplier supp) {
         this.orderID = generatePOId();
         this.orderItems = orderItems;
@@ -23,6 +24,7 @@ public class PurchaseOrder {
         this.itemCount = orderItems.size();
     }
     
+    // for reading
     public PurchaseOrder(String orderID, ArrayList<OrderItem> orderItems, String suppID, 
             LocalDate date, String status, double totalPrice, int itemCount){
         this.orderID = orderID;
@@ -862,11 +864,7 @@ public class PurchaseOrder {
                     }
                 }
                 index++;
-            }
-//            for(int i = 0; i < po.getItemCount(); i++){
-//                System.out.printf("  #%s \t %-20s \t %-3d \t\t   %-7.2f \t\t %-7.2f\n", po.getOrderItems().get(i).getOrdItemID(), tempName, 
-//                po.getOrderItems().get(i).getQuantity(),  po.getOrderItems().get(i).getUnitPrice(),po.getOrderItems().get(i).getTotalPrice());
-//            }
+            } 
             totalPOPrice = po.calTotalPOprice(goodsReturn.get(index -1).getOrderItems());
             System.out.println("=======================================================================================================");
             System.out.printf("          \t\t\t\t\t    Return Total(RM) : \t\t %-7.2f\n", totalPOPrice);
