@@ -52,6 +52,7 @@ public class GoodsReturn {
                         } catch (IOException j) {
                             System.out.println("Empty file failed!");
                         }
+                        //Save Status to Purchase Order File
                         for (PurchaseOrder purchaseOrder1 : purchaseOrder) {
                         if (goodsReturn.getOrderID().equals(purchaseOrder1.getOrderID())) {
                             purchaseOrder1.setStatus("Return");
@@ -63,6 +64,7 @@ public class GoodsReturn {
                     for(int i = 0; i < max; i++){
                         Item.addItemQty(goodsReturn.getOrderItems().get(i).getOrdItemID(), leftQty[i]);
                     }
+                    saveGoodsReturnToFile();
                     System.out.println("Successfully Returned.");
                     }
                     else{
@@ -92,5 +94,9 @@ public class GoodsReturn {
                 System.out.println("Quantity Left: " + leftQty[i]);
                 System.out.println("Cost Left: " + leftCost[i]);
         }
+    }
+    
+    public static void saveGoodsReturnToFile(){
+        
     }
 }

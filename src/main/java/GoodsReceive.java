@@ -203,7 +203,7 @@ public class GoodsReceive {
                     int minInvLV = Integer.parseInt(parts[4]);
                     double unitPrice = Double.parseDouble(parts[5]);
                     ItemGroups itemGroup = groupMap.computeIfAbsent(groupName, ItemGroups::new);
-                    Item item = new Item(itemId, itemName, itemQuantity, itemGroup, minInvLV);
+                    Item item = new Item(itemName, itemQuantity, itemGroup, minInvLV);
                     item.setUnitPrice(unitPrice);
                     Item.getInventory().put(itemId, item);
                     itemList.add(item);
