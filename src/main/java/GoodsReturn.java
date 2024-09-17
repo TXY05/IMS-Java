@@ -32,25 +32,25 @@ public class GoodsReturn {
                 System.out.println("Cost Left: " + leftCost[i]);
             }
             do{
-            System.out.print("Select Item to Return(N to Exit): ");
+                System.out.println("-1 to Exit");
+                System.out.print("Select Item to Return: ");
             
                 try{
                     index = sc.nextInt();
                     invalid = false;
-                    System.out.print("Enter Quantity to Return: ");
-                    returnQty[index - 1] = sc.nextInt();
-                }catch (InputMismatchException e){
-                    String input = sc.next().toUpperCase();
-                    if(input.equals("N")){
-                        invalid = false;
+                    if(index == -1){
                         leave = true;
+                        invalid = false;
                     }
                     else{
+                        System.out.print("Enter Quantity to Return: ");
+                        returnQty[index - 1] = sc.nextInt();
+                    }
+                }catch (InputMismatchException e){
                         System.out.println("Please Enter Integer/N to Exit!");
                         sc.nextLine();
                         invalid = true;
                     }
-                }
             }while(invalid);
         }
     }
