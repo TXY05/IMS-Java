@@ -1,9 +1,13 @@
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Scanner;
 import java.util.ArrayList;
 import java.util.InputMismatchException;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class GoodsReceive {
 
@@ -165,6 +169,9 @@ public class GoodsReceive {
                             saveStatusTOPO(purchaseOrder1);
                         }
                     }
+                    for(int i = 0; i < goodsReceive.getOrderItems().size(); i++){
+                        Item.addItemQty(goodsReceive.getOrderItems().get(i).getOrdItemID(), goodsReceive.getOrderItems().get(i).getQuantity());
+                    }
                     System.out.println("Successfully Received.");
                     invalid = false;
                 }
@@ -178,5 +185,45 @@ public class GoodsReceive {
                 }
             }
         } while (invalid);
+    }
+    
+    public static ArrayList<Item> readAndSaveItem(String filename){
+        ArrayList<Item> itemList = new ArrayList<>();
+        String fileName = "items.txt";
+        try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
+            String line;
+            Map<String, ItemGroups> groupMap = new TreeMap<>();
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts.length == 6) {
+                    String itemId = parts[0];
+                    String itemName = parts[1];
+                    int itemQuantity = Integer.parseInt(parts[2]);
+                    String groupName = parts[3];
+                    int minInvLV = Integer.parseInt(parts[4]);
+                    double unitPrice = Double.parseDouble(parts[5]);
+                    ItemGroups itemGroup = groupMap.computeIfAbsent(groupName, ItemGroups::new);
+                    Item item = new Item(itemId, itemName, itemQuantity, itemGroup, minInvLV);
+                    item.setUnitPrice(unitPrice);
+                    Item.getInventory().put(itemId, item);
+                    itemList.add(item);
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Can't Read File");
+        }
+        return itemList;
+    }
+    
+    public static void saveItemArrayToFile(ArrayList<Item> itemList) {
+        String fileName = "items.txt";
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
+            for (Item item : itemList) {
+                writer.write(item.getItemId() + "," + item.getItemName() + "," + item.getItemQuantity() + "," + item.getItemGroup().getGroupName() + "," + item.getMinInvLV() + "," + item.getUnitPrice());
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            System.out.println("Can't Save File");
+        }
     }
 }

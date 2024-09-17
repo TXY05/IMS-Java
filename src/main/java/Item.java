@@ -37,6 +37,15 @@ public class Item {
         this.itemId = itemId;
         this.itemName = itemName;
     }
+    
+    //For GoodsReceive Item ArrayList
+    public Item(String itemId, String itemName, int itemQuantity, ItemGroups itemGroup, int minInvLV) {
+        this.itemId = itemId;
+        this.itemName = itemName;
+        this.itemQuantity = itemQuantity;
+        this.itemGroup = itemGroup;
+        this.minInvLV = minInvLV;
+    }
 
     // Getters and Setters
     public String getItemName() {
@@ -586,5 +595,23 @@ public class Item {
 
     public String generateItemId() {
         return String.format("I%04d", idCounter.incrementAndGet());
+    }
+    
+    //Add quantity after receving order
+    public static void addItemQty(String restockID, int restockQty){
+        ArrayList<Item> tempItem = GoodsReceive.readAndSaveItem("items.txt");
+        int index = 0;
+        for (Item item : tempItem){
+            if (restockID.equals(item.getItemId())) {
+                tempItem.get(index).setItemQuantity(item.getItemQuantity() + restockQty);
+            }
+            index++;
+        }
+        try {
+            new FileWriter("items.txt", false).close();
+        } catch (IOException e) {
+            System.out.println("Empty file failed!");
+        }
+        GoodsReceive.saveItemArrayToFile(tempItem);
     }
 }

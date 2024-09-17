@@ -19,22 +19,8 @@ public class GoodsReturn {
         double leftCost[] = new double[goodsReturn.getItemCount()];
         
         while(!leave){
-            System.out.println("Goods Return");
-            System.out.println("============");
-            for(int i = 0; i < goodsReturn.getItemCount(); i++){
-                String itemID = goodsReturn.getOrderItems().get(i).getOrdItemID();
-                String itemName = PurchaseOrder.findItemName(goodsReturn, i);
-                int itemQuantity = goodsReturn.getOrderItems().get(i).getQuantity();
-                double itemCost = goodsReturn.getOrderItems().get(i).getTotalPrice();
-                double unitPrice = goodsReturn.getOrderItems().get(i).getUnitPrice();
-                leftQty[i] = itemQuantity - returnQty[i];
-                leftCost[i] = itemCost - (returnQty[i]* unitPrice);
+            showGoodsReturn(goodsReturn, returnQty, leftQty, leftCost);
             
-                System.out.println(i+1 + ". " + itemID + "\t\t" + itemName + "\t\t" + itemQuantity + "\t\t" + itemCost);
-                System.out.println("Amount of Return: " + returnQty[i]);
-                System.out.println("Quantity Left: " + leftQty[i]);
-                System.out.println("Cost Left: " + leftCost[i]);
-            }
             do{
                 System.out.println("-1 to Exit");
                 System.out.println("Press Y to Complete Return");
@@ -74,6 +60,9 @@ public class GoodsReturn {
                             GoodsReceive.saveStatusTOPO(purchaseOrder1);
                         }
                     }
+                    for(int i = 0; i < max; i++){
+                        Item.addItemQty(goodsReturn.getOrderItems().get(i).getOrdItemID(), leftQty[i]);
+                    }
                     System.out.println("Successfully Returned.");
                     }
                     else{
@@ -83,6 +72,25 @@ public class GoodsReturn {
                     }
                 }
             }while(invalid);
+        }
+    }
+
+    private static void showGoodsReturn(PurchaseOrder goodsReturn, int returnQty[], int leftQty[], double leftCost[]){
+            System.out.println("Goods Return");
+            System.out.println("============");
+            for(int i = 0; i < goodsReturn.getItemCount(); i++){
+                String itemID = goodsReturn.getOrderItems().get(i).getOrdItemID();
+                String itemName = PurchaseOrder.findItemName(goodsReturn, i);
+                int itemQuantity = goodsReturn.getOrderItems().get(i).getQuantity();
+                double itemCost = goodsReturn.getOrderItems().get(i).getTotalPrice();
+                double unitPrice = goodsReturn.getOrderItems().get(i).getUnitPrice();
+                leftQty[i] = itemQuantity - returnQty[i];
+                leftCost[i] = itemCost - (returnQty[i]* unitPrice);
+            
+                System.out.println(i+1 + ". " + itemID + "\t\t" + itemName + "\t\t" + itemQuantity + "\t\t" + itemCost);
+                System.out.println("Amount of Return: " + returnQty[i]);
+                System.out.println("Quantity Left: " + leftQty[i]);
+                System.out.println("Cost Left: " + leftCost[i]);
         }
     }
 }
