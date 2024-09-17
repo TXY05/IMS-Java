@@ -12,25 +12,38 @@ public class GoodsReceive{
         ArrayList<PurchaseOrder> goodsReceive = PurchaseOrder.readPOFromFile("PO.txt");
         int choice = 0;
         int max = goodsReceive.size();
-        boolean invalid = false;
-        
-        displayGoodReceive(goodsReceive);
+        boolean invalid;
+        boolean leave = false;
         
         do{
-            System.out.print("Select Order: ");
-            try{
-                choice = sc.nextInt();
-                invalid = choice < 1 || choice > max;
-                if(invalid){
-                    System.out.println("Please choose the option within the range.");
+            displayGoodReceive(goodsReceive);
+        
+            do{
+                System.out.println("Enter -1 to exit");
+                System.out.print("Select Order: ");
+                try{
+                    choice = sc.nextInt();
+                    if(choice == -1){
+                        leave = true;
+                        invalid = false;
+                    }
+                    else{
+                        invalid = choice < 1 || choice > max;
+                        if(invalid){
+                            System.out.println("Please choose the option within the range.");
+                        }
+                    }
+                }catch(InputMismatchException e){
+                    System.out.println("Invalid Input, Please try again!");
+                    sc.next();
+                    invalid = true;
                 }
-            }catch(InputMismatchException e){
-            System.out.println("Invalid Input, Please try again!");
-            sc.next();
-            invalid = true;
+            }while(invalid);
+            
+            if(!leave){
+                showGoodReceive(goodsReceive.get(choice - 1));
             }
-        }while(invalid);
-        showGoodReceive(goodsReceive.get(choice - 1));
+        }while(!leave);
     }
     
     private static void displayGoodReceive(ArrayList<PurchaseOrder> goodsReceive) {
@@ -72,24 +85,49 @@ public class GoodsReceive{
     
     private static void goodsOption(PurchaseOrder goodsReceive){
         Scanner sc = new Scanner(System.in);
-        int choice;
+        int choice = 0;
+        boolean invalid;
+        boolean leave = false;
         
-        System.out.println("1. Confirm Receive");
-        System.out.println("2. Goods Return");
-        System.out.print("Select Option: ");
-        choice = sc.nextInt();
+        do{
+            do{
+                System.out.println("1. Confirm Receive");
+                System.out.println("2. Goods Return");
+                System.out.println("3. Back");
+                System.out.print("Select Option: ");
         
-        switch(choice){
-            case 1 -> {
-                confirmReceive(goodsReceive);
-                return;
+                try{
+                    choice = sc.nextInt();
+                    invalid = false;
+                }catch (InputMismatchException e) {
+                    System.out.println("Invalid Input, Please try again!");
+                    sc.next();
+                    invalid = true;
+                }
+            }while(invalid);
+        
+            switch(choice){
+                case 1 -> {
+                    confirmReceive(goodsReceive);
+                    GoodsReceive.GoodsMenu();
+                    break;
+                }
+                case 2 -> {
+                    GoodsReturn.goodsReturnMenu(goodsReceive);
+                    GoodsReceive.showGoodReceive(goodsReceive);
+                    break;
+                }
+                case 3 -> {
+                    leave = true;
+                    break;
+                }
+                default -> {
+                    System.out.println("Invalid options!");
+                    System.out.println("Please choose the option within the range.");
+                    break;
+                }
             }
-            case 2 -> GoodsReturn.goodsReturnMenu(goodsReceive);
-            default -> {
-                System.out.println("Invalid options!");
-                System.out.println("Please choose the option within the range.");
-            }
-        }
+        }while(!leave);
     }
     
     public static void saveStatusTOPO(PurchaseOrder goodsReceive){
@@ -111,21 +149,23 @@ public class GoodsReceive{
     private static void confirmReceive(PurchaseOrder goodsReceive) {
         Scanner sc = new Scanner(System.in);
         ArrayList<PurchaseOrder> purchaseOrder = PurchaseOrder.readPOFromFile("PO.txt");
-        boolean invalid = false;
-        char input;
-        
-        System.out.println("Are you sure to confirm order?");
-        System.out.print("Y/N: ");
-        input = Character.toUpperCase(sc.next(".").charAt(0));
+        boolean invalid;
+        String input;
         
         do{
+        System.out.println("Are you sure to confirm order?");
+        System.out.print("Y/N: ");
+        input = sc.next().toUpperCase();
+        
             switch (input) {
-                case 'Y' -> {
+                case "Y" -> {
                     try{
                         new FileWriter("PO.txt", false).close();
                     }catch (IOException e){
                         System.out.println("Empty file failed!");
-                    }       for(PurchaseOrder purchaseOrder1 : purchaseOrder) {
+                        
+                    }   
+                    for(PurchaseOrder purchaseOrder1 : purchaseOrder) {
                         if(goodsReceive.getOrderID().equals(purchaseOrder1.getOrderID())){
                             purchaseOrder1.setStatus("Receive");
                             saveStatusTOPO(purchaseOrder1);
@@ -133,10 +173,16 @@ public class GoodsReceive{
                         else{
                             saveStatusTOPO(purchaseOrder1);
                         }
-                        
-                    }       System.out.println("Successfully Received.");
+                        System.out.println("Successfully Received.");
+                    }
+                    invalid = false;
                 }
-                case 'N' -> System.out.println("Order not receive");
+                case "N" -> {
+                    System.out.println("Order not receive");
+                    invalid = false;
+                    GoodsReceive.showGoodReceive(goodsReceive);
+                    break;
+                }
                 default -> {
                     System.out.println("Please enter Y or N");
                     invalid = true;

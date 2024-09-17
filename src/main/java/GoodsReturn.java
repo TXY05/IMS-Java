@@ -1,13 +1,14 @@
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class GoodsReturn {
     
     public static void goodsReturnMenu(PurchaseOrder goodsReturn){
-        boolean leave = false;
         Scanner sc = new Scanner(System.in);
-        int index;
+        boolean leave = false;
+        boolean invalid;
+        int index = 0;
         int returnQty[] = new int[goodsReturn.getItemCount()];
         Arrays.fill(returnQty, 0);
         int leftQty[] = new int[goodsReturn.getItemCount()];
@@ -30,16 +31,27 @@ public class GoodsReturn {
                 System.out.println("Quantity Left: " + leftQty[i]);
                 System.out.println("Cost Left: " + leftCost[i]);
             }
+            do{
             System.out.print("Select Item to Return(N to Exit): ");
-            index = sc.nextInt();
             
-            if(index == 'N'){
-                leave = true;
-            }
-            else{
-                System.out.print("Enter Quantity to Return: ");
-                returnQty[index] = sc.nextInt();
-            }
+                try{
+                    index = sc.nextInt();
+                    invalid = false;
+                    System.out.print("Enter Quantity to Return: ");
+                    returnQty[index - 1] = sc.nextInt();
+                }catch (InputMismatchException e){
+                    String input = sc.next().toUpperCase();
+                    if(input.equals("N")){
+                        invalid = false;
+                        leave = true;
+                    }
+                    else{
+                        System.out.println("Please Enter Integer/N to Exit!");
+                        sc.nextLine();
+                        invalid = true;
+                    }
+                }
+            }while(invalid);
         }
     }
 }
