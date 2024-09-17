@@ -64,7 +64,7 @@ public class GoodsReturn {
                     for(int i = 0; i < max; i++){
                         Item.addItemQty(goodsReturn.getOrderItems().get(i).getOrdItemID(), leftQty[i]);
                     }
-                    saveGoodsReturnToFile();
+                    saveGoodsReturnToFile(goodsReturn, returnQty);
                     System.out.println("Successfully Returned.");
                     }
                     else{
@@ -96,7 +96,31 @@ public class GoodsReturn {
         }
     }
     
-    public static void saveGoodsReturnToFile(){
+    public static void saveGoodsReturnToFile(PurchaseOrder goodsReturn, int returnQty[]){
+        String orderID = goodsReturn.getOrderID();
+        int itemCount = goodsReturn.getItemCount();
+        int itemLoop = 0;
         
+        for (int j = 0; j < itemCount; j++){
+            if(returnQty[j] > 0){
+                itemLoop++;
+            }
+        }
+        try(FileWriter writeGoods = new FileWriter("GoodsReturn.txt", true)){
+            writeGoods.write(orderID + "|" + itemLoop);
+            
+            for(int i = 0; i < itemCount; i++){
+                if(returnQty[i] > 0){
+                    writeGoods.write("\n");
+                    writeGoods.write(goodsReturn.getOrderItems().get(i).getOrdItemID() + "|" + returnQty[i] + 
+                        "|" + goodsReturn.getOrderItems().get(i).getUnitPrice());
+                }
+            }
+            writeGoods.write("\n");
+            writeGoods.close();
+        } catch (IOException e){
+            System.out.println("Write GoodsReturn File Failed!");
+            System.exit(1);
+        }
     }
 }
