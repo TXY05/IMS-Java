@@ -490,6 +490,7 @@ public class PurchaseOrder {
             }while(error);
             
             do {
+                error = true;
                 System.out.println("=======================================================================================================");
                 System.out.print("  Continue Reducing Item ? (Y/N): ");
                 try{
@@ -561,6 +562,7 @@ public class PurchaseOrder {
             }while(error);
             
             do {
+                error = true;
                 System.out.println("=======================================================================================================");
                 System.out.print("  Continue Editing Unit Price ? (Y/N): ");
                 try{
