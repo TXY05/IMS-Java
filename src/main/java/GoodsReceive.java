@@ -47,11 +47,11 @@ public class GoodsReceive {
                     else {
                         invalid = choice < 1 || choice > max; //Find invalid
                         if (invalid) {
-                            System.out.println("Please choose an option within the range.");
+                            System.out.println("Please choose an option within the range.\n");
                         }
                     }
                 } catch (InputMismatchException e) {
-                    System.out.println("Invalid Input, Please try again!");
+                    System.out.println("Invalid Input, Please try again!\n");
                     sc.next();
                     invalid = true;
                 }
@@ -68,7 +68,7 @@ public class GoodsReceive {
     private static void displayGoodReceive(ArrayList<PurchaseOrder> goodsReceive) {
         int max = goodsReceive.size();
         
-        System.out.println("==============================");
+        System.out.println("\n==============================");
         System.out.printf("%20s\n", "Goods Receive");
         System.out.println("==============================");
         System.out.println("Purchase Order");
@@ -132,7 +132,7 @@ public class GoodsReceive {
                     choice = sc.nextInt();
                     invalid = false;
                 } catch (InputMismatchException e) {
-                    System.out.println("Invalid Input, Please try again!");
+                    System.out.println("Invalid Input, Please try again!\n");
                     sc.next();
                     invalid = true;
                 }
@@ -150,7 +150,7 @@ public class GoodsReceive {
                 case 3 -> {
                     leave = true; //Leave
                 }
-                default -> System.out.println("Invalid options! Please choose the option within the range.");
+                default -> System.out.println("Invalid options! Please choose the option within the range.\n");
             }
         }
     }

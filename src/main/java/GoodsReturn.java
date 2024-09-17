@@ -11,6 +11,7 @@ public class GoodsReturn {
         Scanner sc = new Scanner(System.in);
         boolean leave = false;
         boolean invalid;
+        boolean invalidQty;
         int max = goodsReturn.getOrderItems().size();
         int returnQty[] = new int[goodsReturn.getItemCount()];
         Arrays.fill(returnQty, 0); //Initialize all returnQty with 0
@@ -30,17 +31,38 @@ public class GoodsReturn {
                 try{
                     index = sc.nextInt();
                     if(index == -1){ //If input = -1, Leave
+                        System.out.println("Return Cancelled");
                         leave = true;
                         invalid = false;
                     }
                     else if(index < 1 || index > max){ //Detect Invalid Input
                         invalid = true;
-                        System.out.println("Please choose an option within the range.");
+                        System.out.println("Please choose an option within the range.\n");
                     }
                     else{ //If valid
-                        System.out.print("Enter Quantity to Return: ");
-                        returnQty[index - 1] = sc.nextInt();
-                        invalid = false;
+                        do{
+                            System.out.print("Enter Quantity to Return: ");
+                            try{
+                                returnQty[index - 1] = sc.nextInt();
+                                if(returnQty[index - 1] == -1){ //If input = -1, Leave
+                                    System.out.println("Return Cancelled");
+                                    leave = true;
+                                    invalidQty = false;
+                                }
+                                else if(returnQty[index - 1] < 1 || returnQty[index - 1] > goodsReturn.getOrderItems().get(index-1).getQuantity()){ //Detect Invalid Input
+                                    invalidQty = true;
+                                    System.out.println("Please enter quantity within the range.\n");
+                                }
+                                else{
+                                    invalidQty = false;
+                                }
+                            }catch (InputMismatchException e){
+                                System.out.println("Quantity can only be number!\n");
+                                sc.next();
+                                invalidQty = true;
+                            }
+                            invalid = false;
+                        }while(invalidQty);
                     }
                 }catch (InputMismatchException e){
                     String input = sc.next().toUpperCase(); //Get To Upper Case
@@ -72,7 +94,7 @@ public class GoodsReturn {
                     System.out.println("Successfully Returned.");
                     }
                     else{ //Invalid Option
-                        System.out.println("Please Enter Integer/-1 to Exit!");
+                        System.out.println("Please Enter Integer/-1 to Exit!\n");
                         sc.nextLine();
                         invalid = true;
                     }
@@ -98,9 +120,9 @@ public class GoodsReturn {
                 leftCost[i] = itemCost - (returnQty[i]* unitPrice);
 
                 System.out.printf("%d. %-10s %-20s %-5d %.2f\n",i + 1, itemID, itemName, itemQuantity, itemCost);
-                System.out.printf("%s %-10d\n","Amount of Return:",returnQty[i]);
-                System.out.printf("%s %-10d\n","Quantity Left:",leftQty[i]);
-                System.out.printf("%s %-10f\n","Cost Left:",leftCost[i]);
+                System.out.printf("%s %d\n","Amount of Return:",returnQty[i]);
+                System.out.printf("%s %d\n","Quantity Left:",leftQty[i]);
+                System.out.printf("%s %.2f\n","Cost Left:",leftCost[i]);
                 System.out.println("------------------------------");
         }
     }
