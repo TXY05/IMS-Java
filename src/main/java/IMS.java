@@ -102,5 +102,9 @@ public class IMS {
             e.printStackTrace();
         }
     }
-
+    public static void systemPause(){
+        Scanner sc = new Scanner(System.in);
+        System.out.println("\nPress Enter to continue...");
+        sc.nextLine();
+    }
 }

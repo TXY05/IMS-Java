@@ -54,6 +54,7 @@ public class GoodsReturn {
                     index = sc.nextInt();
                     if(index == -1){ //If input = -1, Leave
                         System.out.println("Return Cancelled");
+                        IMS.systemPause();
                         leave = true;
                         invalid = false;
                     }
@@ -68,6 +69,7 @@ public class GoodsReturn {
                                 returnQty[index - 1] = sc.nextInt();
                                 if(returnQty[index - 1] == -1){ //If input = -1, Leave
                                     System.out.println("Return Cancelled");
+                                    IMS.systemPause();
                                     leave = true;
                                     invalidQty = false;
                                 }
@@ -114,6 +116,7 @@ public class GoodsReturn {
                     //Save Goods Return To Goods Return File
                     saveGoodsReturnToFile(goodsReturn, returnQty);
                     System.out.println("Successfully Returned.");
+                    IMS.systemPause();
                     }
                     else{ //Invalid Option
                         System.out.println("Please Enter Integer/-1 to Exit!\n");
