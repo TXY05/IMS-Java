@@ -10,37 +10,42 @@ import java.util.Map;
 import java.util.TreeMap;
 
 public class GoodsReceive {
-
+    
+    //Display Menu After Choosing Goods Receive Option
     public static void GoodsMenu() {
         Scanner sc = new Scanner(System.in);
-        int choice = 0;
         boolean invalid;
         boolean leave = false;
+        int choice = 0;
 
         while (!leave) {
+            //Read PO File and get Array List
             ArrayList<PurchaseOrder> goodsReceive = PurchaseOrder.readPOFromFile("PO.txt");
-            int max = goodsReceive.size();
+            int max = goodsReceive.size(); //Assign max value
             
+            //Remove Returned and Received Order
             for(int i = max -1; i >= 0; i--){
                 if(goodsReceive.get(i).getStatus().equals("Receive") ||
                         goodsReceive.get(i).getStatus().equals("Return")){
                     goodsReceive.remove(i);
                 }
             }
-            max = goodsReceive.size();
+            max = goodsReceive.size(); //Assign new max value
+            
+            //Display Goods Receive Order
             displayGoodReceive(goodsReceive);
 
             do {
-                System.out.println("Enter -1 to exit");
+                System.out.println("(Enter -1 to Exit)");
                 System.out.print("Select Order: ");
                 try {
                     choice = sc.nextInt();
-                    if (choice == -1) {
+                    if (choice == -1) { //If choice = -1, leave
                         leave = true;
                         invalid = false;
                     } 
                     else {
-                        invalid = choice < 1 || choice > max;
+                        invalid = choice < 1 || choice > max; //Find invalid
                         if (invalid) {
                             System.out.println("Please choose an option within the range.");
                         }
@@ -53,34 +58,47 @@ public class GoodsReceive {
             } while (invalid);
 
             if (!leave) {
+                //After choosing valid goods Receive Order
                 showGoodReceive(goodsReceive.get(choice - 1));
             }
         }
     }
-
+    
+    //Display Goods Receive Order
     private static void displayGoodReceive(ArrayList<PurchaseOrder> goodsReceive) {
-        System.out.println("Goods Receive");
-        System.out.println("=============");
+        int max = goodsReceive.size();
+        
+        System.out.println("==============================");
+        System.out.printf("%20s\n", "Goods Receive");
+        System.out.println("==============================");
         System.out.println("Purchase Order");
-
-        for (int i = 0; i < goodsReceive.size(); i++) {
+        System.out.println("--------------");
+        
+        //Print all Goods Receive Order out
+        for (int i = 0; i < max; i++) {
             int itemCount = goodsReceive.get(i).getItemCount();
 
-            System.out.print(i + 1 + " " + goodsReceive.get(i).getOrderID() + "\t\t\n" +
-                    "\tItem List: ");
-
+            System.out.print(i + 1 + ". " + goodsReceive.get(i).getOrderID() + "\n" +
+                    "Item List: ");
+            
+            //Loop to print all item
             for (int j = 0; j < itemCount; j++) {
                 String itemName = PurchaseOrder.findItemName(goodsReceive.get(i), j);
                 System.out.print(itemName + " ");
             }
-            System.out.println("\n");
+            System.out.println("\n------------------------------");
         }
     }
-
+    
+    //Display Choosen Order
     private static void showGoodReceive(PurchaseOrder goodsReceive) {
-        int itemNum = goodsReceive.getItemCount();
         Supplier supplier = PurchaseOrder.findSupplier(goodsReceive.getSuppID());
-        System.out.println(goodsReceive.getOrderID() + "\t" + supplier.getName());
+        int itemNum = goodsReceive.getItemCount();
+        
+        System.out.println("\n==============================");
+        System.out.printf("%-10s %s\n",goodsReceive.getOrderID(), supplier.getName());
+        System.out.println("------------------------------");
+        System.out.printf("%s %-10s %-20s %-5s %s\n", "No", "Item ID", "Item Name", "Qty", "Total Cost");
 
         for (int i = 0; i < itemNum; i++) {
             String itemID = goodsReceive.getOrderItems().get(i).getOrdItemID();
@@ -88,17 +106,20 @@ public class GoodsReceive {
             int itemQuantity = goodsReceive.getOrderItems().get(i).getQuantity();
             double itemCost = goodsReceive.getOrderItems().get(i).getTotalPrice();
 
-            System.out.println(i + 1 + ". " + itemID + "\t\t" + itemName + "\t\t" + itemQuantity + "\t\t" + itemCost);
+            System.out.printf("%d. %-10s %-20s %-5d %.2f\n",i + 1, itemID, itemName, itemQuantity, itemCost);
         }
         System.out.println("\n");
+        
+        //Display Options for user
         goodsOption(goodsReceive);
     }
-
+    
+    //Display Options for user
     private static void goodsOption(PurchaseOrder goodsReceive) {
         Scanner sc = new Scanner(System.in);
-        int choice = 0;
         boolean invalid;
         boolean leave = false;
+        int choice = 0;
 
         while (!leave) {
             do {
@@ -119,21 +140,22 @@ public class GoodsReceive {
 
             switch (choice) {
                 case 1 -> {
-                    confirmReceive(goodsReceive);
+                    confirmReceive(goodsReceive); //Confirm Receive Option
                     leave = true;
                 }
                 case 2 -> {
-                    GoodsReturn.goodsReturnMenu(goodsReceive);
+                    GoodsReturn.goodsReturnMenu(goodsReceive); //Goods Return Menu
                     leave = true;
                 }
                 case 3 -> {
-                    leave = true;
+                    leave = true; //Leave
                 }
                 default -> System.out.println("Invalid options! Please choose the option within the range.");
             }
         }
     }
 
+    //Save Status Into Purchase Order File
     public static void saveStatusTOPO(PurchaseOrder goodsReceive) {
         try (BufferedWriter bw = new BufferedWriter(new FileWriter("PO.txt", true))) {
             bw.write(goodsReceive.getOrderID() + "|" + goodsReceive.getSuppID() + "|" + goodsReceive.getOrderDate() + "|" +
@@ -151,6 +173,7 @@ public class GoodsReceive {
         }
     }
 
+    //Confirm Receive Page
     private static void confirmReceive(PurchaseOrder goodsReceive) {
         Scanner sc = new Scanner(System.in);
         ArrayList<PurchaseOrder> purchaseOrder = PurchaseOrder.readPOFromFile("PO.txt");
@@ -158,17 +181,20 @@ public class GoodsReceive {
         String input;
 
         do {
-            System.out.println("Are you sure to confirm order?");
+            System.out.println("\nAre you sure to confirm order?");
+            System.out.println("(Y to Confirm, N to Cancel)");
             System.out.print("Y/N: ");
-            input = sc.next().toUpperCase();
+            input = sc.next().toUpperCase(); //To Upper Case
 
             switch (input) {
-                case "Y" -> {
+                case "Y" -> { //If yes
+                    //Empty Purchase Order File for Overwritting
                     try {
                         new FileWriter("PO.txt", false).close();
                     } catch (IOException e) {
                         System.out.println("Empty file failed!");
                     }
+                    //Save all back into Purchase Order File with Updated Status
                     for (PurchaseOrder purchaseOrder1 : purchaseOrder) {
                         if (goodsReceive.getOrderID().equals(purchaseOrder1.getOrderID())) {
                             purchaseOrder1.setStatus("Receive");
@@ -177,15 +203,16 @@ public class GoodsReceive {
                             saveStatusTOPO(purchaseOrder1);
                         }
                     }
+                    //Add Quantity into Item File
                     for(int i = 0; i < goodsReceive.getOrderItems().size(); i++){
                         Item.addItemQty(goodsReceive.getOrderItems().get(i).getOrdItemID(), goodsReceive.getOrderItems().get(i).getQuantity());
                     }
                     System.out.println("Successfully Received.");
                     invalid = false;
                 }
-                case "N" -> {
+                case "N" -> { //If no
                     System.out.println("Order not received.");
-                    invalid = false;
+                    invalid = false; //Exit
                 }
                 default -> {
                     System.out.println("Please enter Y or N");
@@ -195,6 +222,7 @@ public class GoodsReceive {
         } while (invalid);
     }
     
+    //Read and get Item Array List
     public static ArrayList<Item> readAndSaveItem(String filename){
         ArrayList<Item> itemList = new ArrayList<>();
         String fileName = "items.txt";
@@ -223,6 +251,7 @@ public class GoodsReceive {
         return itemList;
     }
     
+    //Save Item Array List into Item File
     public static void saveItemArrayToFile(ArrayList<Item> itemList) {
         String fileName = "items.txt";
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {

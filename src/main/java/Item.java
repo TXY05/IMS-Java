@@ -627,6 +627,7 @@ public class Item {
             }
             index++;
         }
+        //Empty Item File for Overwritting
         try {
             new FileWriter("items.txt", false).close();
         } catch (IOException e) {
