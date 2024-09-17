@@ -1,3 +1,6 @@
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.InputMismatchException;
 import java.util.Scanner;
@@ -8,6 +11,7 @@ public class GoodsReturn {
         Scanner sc = new Scanner(System.in);
         boolean leave = false;
         boolean invalid;
+        int max = goodsReturn.getOrderItems().size();
         int index = 0;
         int returnQty[] = new int[goodsReturn.getItemCount()];
         Arrays.fill(returnQty, 0);
@@ -33,24 +37,51 @@ public class GoodsReturn {
             }
             do{
                 System.out.println("-1 to Exit");
+                System.out.println("Press Y to Complete Return");
                 System.out.print("Select Item to Return: ");
             
                 try{
                     index = sc.nextInt();
-                    invalid = false;
                     if(index == -1){
                         leave = true;
                         invalid = false;
                     }
+                    else if(index < 1 || index > max){
+                        invalid = true;
+                        System.out.println("Please choose an option within the range.");
+                    }
                     else{
                         System.out.print("Enter Quantity to Return: ");
                         returnQty[index - 1] = sc.nextInt();
+                        invalid = false;
                     }
                 }catch (InputMismatchException e){
-                        System.out.println("Please Enter Integer/N to Exit!");
+                    String input = sc.next().toUpperCase();
+                    if(input.equals("Y")){
+                        ArrayList<PurchaseOrder> purchaseOrder = PurchaseOrder.readPOFromFile("PO.txt");
+                        invalid = false;
+                        leave = true;
+                        try {
+                            new FileWriter("PO.txt", false).close();
+                        } catch (IOException j) {
+                            System.out.println("Empty file failed!");
+                        }
+                        for (PurchaseOrder purchaseOrder1 : purchaseOrder) {
+                        if (goodsReturn.getOrderID().equals(purchaseOrder1.getOrderID())) {
+                            purchaseOrder1.setStatus("Return");
+                            GoodsReceive.saveStatusTOPO(purchaseOrder1);
+                        } else {
+                            GoodsReceive.saveStatusTOPO(purchaseOrder1);
+                        }
+                    }
+                    System.out.println("Successfully Returned.");
+                    }
+                    else{
+                        System.out.println("Please Enter Integer/-1 to Exit!");
                         sc.nextLine();
                         invalid = true;
                     }
+                }
             }while(invalid);
         }
     }

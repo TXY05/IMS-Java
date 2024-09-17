@@ -26,7 +26,8 @@ public class GoodsReceive {
                     if (choice == -1) {
                         leave = true;
                         invalid = false;
-                    } else {
+                    } 
+                    else {
                         invalid = choice < 1 || choice > max;
                         if (invalid) {
                             System.out.println("Please choose an option within the range.");
