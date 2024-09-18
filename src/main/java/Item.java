@@ -159,10 +159,16 @@ public class Item {
 
         if (getInventory().containsKey(itemId)) {
             Item item = getInventory().get(itemId);
-            System.out.print("Enter the new quantity for item " + item.getItemName() + ":" );
+            System.out.print("Enter the new quantity for item " + item.getItemName() + ": ");
             String quantityInput = scanner.nextLine();
             if (quantityInput.equalsIgnoreCase("e")) return;
-            item.itemQuantity = Integer.parseInt(quantityInput);
+            while (!isValidItemQuantity(quantityInput)) {
+                System.out.println("Invalid quantity. Please enter a positive integer between 0 and 100.");
+                quantityInput = scanner.nextLine();
+                if (quantityInput.equalsIgnoreCase("e")) return;
+            }
+            int newQuantity = Integer.parseInt(quantityInput);
+            item.setItemQuantity(newQuantity);
             System.out.println("New quantity of " + item.getItemName() + ": " + item.getItemQuantity());
             saveInventoryToFile();  // Save changes to file
         } else {
@@ -180,32 +186,52 @@ public class Item {
 
         Item item = getInventory().get(itemId);
         if (item != null) {
-            System.out.println("\nItem Details:");
-            System.out.printf("%-10s | %-20s | %-10s | %-15s%n", "ID", "Name", "Quantity", "Category");
-            System.out.println("-------------------------------------------------------------");
-            System.out.printf("%-10s | %-20s | %-10d | %-15s%n", item.getItemId(), item.getItemName(), item.getItemQuantity(), item.getItemGroup().getGroupName());
-
             boolean editing = true;
             while (editing) {
+                System.out.println("\nItem Details:");
+                System.out.printf("%-10s | %-20s | %-10s | %-15s | %-10s | %-10s%n", "ID", "Name", "Quantity", "Category", "Min Stock", "Unit Price");
+                System.out.println("------------------------------------------------------------------------------------------");
+                System.out.printf("%-10s | %-20s | %-10d | %-15s | %-10d | %-10.2f%n", item.getItemId(), item.getItemName(), item.getItemQuantity(), item.getItemGroup().getGroupName(), item.getMinInvLV(), item.getUnitPrice());
+
                 System.out.println("\nEditing item: " + item.getItemName());
                 System.out.println("1. Edit Name");
                 System.out.println("2. Edit Quantity");
                 System.out.println("3. Edit Group");
-                System.out.println("4. Exit");
+                System.out.println("4. Edit Min Stock Level");
+                System.out.println("5. Edit Unit Price");
+                System.out.println("6. Exit");
                 System.out.print("Choose an option: ");
-                int choice = scanner.nextInt();
-                scanner.nextLine();  // Consume newline
+                String choiceInput = scanner.nextLine();
+                if (choiceInput.equalsIgnoreCase("e")) return;
+                while (choiceInput.isEmpty() || !isValidChoice(choiceInput, 6)) {
+                    System.out.println("Invalid choice. Please enter a number between 1 and 6.");
+                    choiceInput = scanner.nextLine();
+                    if (choiceInput.equalsIgnoreCase("e")) return;
+                }
+                int choice = Integer.parseInt(choiceInput);
 
                 switch (choice) {
                     case 1:
                         System.out.print("Enter new name: ");
                         String newName = scanner.nextLine();
+                        if (newName.equalsIgnoreCase("e")) return;
+                        while (newName.isEmpty()) {
+                            System.out.println("Item name cannot be empty. Please enter a valid item name.");
+                            newName = scanner.nextLine();
+                            if (newName.equalsIgnoreCase("e")) return;
+                        }
                         item.setItemName(newName);
                         break;
                     case 2:
                         System.out.print("Enter new quantity: ");
-                        int newQuantity = scanner.nextInt();
-                        scanner.nextLine();  // Consume newline
+                        String quantityInput = scanner.nextLine();
+                        if (quantityInput.equalsIgnoreCase("e")) return;
+                        while (!isValidItemQuantity(quantityInput)) {
+                            System.out.println("Invalid quantity. Please enter a positive integer between 0 and 100.");
+                            quantityInput = scanner.nextLine();
+                            if (quantityInput.equalsIgnoreCase("e")) return;
+                        }
+                        int newQuantity = Integer.parseInt(quantityInput);
                         item.setItemQuantity(newQuantity);
                         break;
                     case 3:
@@ -214,27 +240,83 @@ public class Item {
                         for (int i = 0; i < existingGroups.size(); i++) {
                             System.out.println((i + 1) + ". " + existingGroups.get(i).getGroupName());
                         }
-                        System.out.print("Choose a new group: ");
-                        int groupChoice = scanner.nextInt();
-                        scanner.nextLine();  // Consume newline
+                        System.out.println((existingGroups.size() + 1) + ". Create new group");
+
+                        int groupChoice = -1;
+                        while (groupChoice < 1 || groupChoice > existingGroups.size() + 1) {
+                            System.out.print("Choose an option: ");
+                            String groupChoiceInput = scanner.nextLine();
+                            if (groupChoiceInput.equalsIgnoreCase("e")) return;
+                            try {
+                                groupChoice = Integer.parseInt(groupChoiceInput);
+                                if (groupChoice < 1 || groupChoice > existingGroups.size() + 1) {
+                                    System.out.println("Invalid choice. Please choose a valid option.");
+                                }
+                            } catch (NumberFormatException e) {
+                                System.out.println("Invalid input. Please enter a number.");
+                            }
+                        }
+
                         if (groupChoice > 0 && groupChoice <= existingGroups.size()) {
-                            ItemGroups newGroup = existingGroups.get(groupChoice - 1);
+                            item.setItemGroup(existingGroups.get(groupChoice - 1));
+                        } else if (groupChoice == existingGroups.size() + 1) {
+                            System.out.print("Enter the new group name: ");
+                            String groupName = scanner.nextLine();
+                            if (groupName.equalsIgnoreCase("e")) return;
+                            while (groupName.isEmpty()) {
+                                System.out.println("Group name cannot be empty. Please enter a valid group name.");
+                                groupName = scanner.nextLine();
+                                if (groupName.equalsIgnoreCase("e")) return;
+                            }
+                            ItemGroups newGroup = new ItemGroups(groupName);
+                            existingGroups.add(newGroup);
                             item.setItemGroup(newGroup);
-                        } else {
-                            System.out.println("Invalid group choice.");
                         }
                         break;
                     case 4:
+                        System.out.print("Enter new minimum stock level: ");
+                        String minStockInput = scanner.nextLine();
+                        if (minStockInput.equalsIgnoreCase("e")) return;
+                        while (!isValidMinStockLevel(minStockInput)) {
+                            System.out.println("Invalid minimum stock level. Please enter an integer between 1 and 100.");
+                            minStockInput = scanner.nextLine();
+                            if (minStockInput.equalsIgnoreCase("e")) return;
+                        }
+                        int newMinInvLV = Integer.parseInt(minStockInput);
+                        item.setMinInvLV(newMinInvLV);
+                        break;
+                    case 5:
+                        System.out.print("Enter new unit price: ");
+                        String priceInput = scanner.nextLine();
+                        if (priceInput.equalsIgnoreCase("e")) return;
+                        while (priceInput.isEmpty() || !isValidUnitPrice(priceInput)) {
+                            System.out.println("Invalid unit price. Please enter a value between 1 and 1000.");
+                            priceInput = scanner.nextLine();
+                            if (priceInput.equalsIgnoreCase("e")) return;
+                        }
+                        double newUnitPrice = Double.parseDouble(priceInput);
+                        item.setUnitPrice(newUnitPrice);
+                        break;
+                    case 6:
                         editing = false;
                         break;
                     default:
                         System.out.println("Invalid choice. Please try again.");
                 }
+                saveInventoryToFile();  // Save changes to file
+                removeEmptyGroups();  // Remove empty groups
             }
-            saveInventoryToFile();  // Save changes to file
-            removeEmptyGroups();  // Remove empty groups
         } else {
             System.out.println("Item ID not found in inventory.");
+        }
+    }
+
+    private static boolean isValidChoice(String choiceInput, int maxOption) {
+        try {
+            int choice = Integer.parseInt(choiceInput);
+            return choice >= 1 && choice <= maxOption;
+        } catch (NumberFormatException e) {
+            return false;
         }
     }
 
@@ -247,35 +329,47 @@ public class Item {
         Scanner scanner = new Scanner(System.in);
 
         System.out.print("\nPress 'e' to exit at any time.");
-        System.out.print("\nEnter the item name : ");
+        System.out.print("\nEnter the item name: ");
         String itemName = scanner.nextLine();
         if (itemName.equalsIgnoreCase("e")) return;
-        if (itemName.isEmpty()) {
-            System.out.println("Item name cannot be empty.");
-            return;
+        while (itemName.isEmpty()) {
+            System.out.println("Item name cannot be empty. Please enter a valid item name.");
+            itemName = scanner.nextLine();
+            if (itemName.equalsIgnoreCase("e")) return;
         }
 
-        System.out.print("Enter the item quantity : ");
+        System.out.print("Enter the item quantity: ");
         String quantityInput = scanner.nextLine();
         if (quantityInput.equalsIgnoreCase("e")) return;
+        while (quantityInput.isEmpty()) {
+            System.out.println("Quantity cannot be empty. Please enter a valid quantity.");
+            quantityInput = scanner.nextLine();
+            if (quantityInput.equalsIgnoreCase("e")) return;
+        }
         int itemQuantity = Integer.parseInt(quantityInput);
         if (itemQuantity < 0) {
             System.out.println("Quantity cannot be negative.");
             return;
         }
 
-        System.out.print("Enter the minimum stock level: ");
+        System.out.print("Enter the minimum stock level (1-100): ");
         String minStockInput = scanner.nextLine();
         if (minStockInput.equalsIgnoreCase("e")) return;
-        int minInvLV = Integer.parseInt(minStockInput);
-        if (minInvLV < 0) {
-            System.out.println("Minimum stock level cannot be negative.");
-            return;
+        while (!isValidMinStockLevel(minStockInput)) {
+            System.out.println("Invalid minimum stock level. Please enter an integer between 1 and 100.");
+            minStockInput = scanner.nextLine();
+            if (minStockInput.equalsIgnoreCase("e")) return;
         }
+        int minInvLV = Integer.parseInt(minStockInput);
 
         System.out.print("Enter the unit price: ");
         String priceInput = scanner.nextLine();
         if (priceInput.equalsIgnoreCase("e")) return;
+        while (priceInput.isEmpty()) {
+            System.out.println("Unit price cannot be empty. Please enter a valid unit price.");
+            priceInput = scanner.nextLine();
+            if (priceInput.equalsIgnoreCase("e")) return;
+        }
         double unitPrice = Double.parseDouble(priceInput);
         if (unitPrice < 0) {
             System.out.println("Unit price cannot be negative.");
@@ -292,6 +386,11 @@ public class Item {
         System.out.print("Choose an option: ");
         String groupChoiceInput = scanner.nextLine();
         if (groupChoiceInput.equalsIgnoreCase("e")) return;
+        while (groupChoiceInput.isEmpty() || !isValidItemGroup(groupChoiceInput, existingGroups.size())) {
+            System.out.println("Invalid choice. Please choose a valid option.");
+            groupChoiceInput = scanner.nextLine();
+            if (groupChoiceInput.equalsIgnoreCase("e")) return;
+        }
         int groupChoice = Integer.parseInt(groupChoiceInput);
 
         ItemGroups itemGroup;
@@ -301,9 +400,10 @@ public class Item {
             System.out.print("Enter the new group name: ");
             String groupName = scanner.nextLine();
             if (groupName.equalsIgnoreCase("e")) return;
-            if (groupName.isEmpty()) {
-                System.out.println("Group name cannot be empty.");
-                return;
+            while (groupName.isEmpty()) {
+                System.out.println("Group name cannot be empty. Please enter a valid group name.");
+                groupName = scanner.nextLine();
+                if (groupName.equalsIgnoreCase("e")) return;
             }
             itemGroup = new ItemGroups(groupName);
             existingGroups.add(itemGroup);
@@ -330,30 +430,39 @@ public class Item {
 
     public static void displayInventory() {
         Scanner scanner = new Scanner(System.in);
+        boolean exit = false;
 
-        System.out.println("\nDisplay Inventory Options:");
-        System.out.println("1. Display All Items");
-        System.out.println("2. Display Items by Group");
-        System.out.println("3. Display Item by ID");
-        System.out.println("4. Exit");
-        System.out.print("Choose an option: ");
-        int choice = scanner.nextInt();
-        scanner.nextLine();  // Consume newline
+        while (!exit) {
+            System.out.println("\nDisplay Inventory Options:");
+            System.out.println("1. Display All Items");
+            System.out.println("2. Display Items by Group");
+            System.out.println("3. Display Item by ID");
+            System.out.println("4. Exit");
+            System.out.print("Choose an option: ");
 
-        switch (choice) {
-            case 1:
-                displayAllItems();
-                break;
-            case 2:
-                displayItemsByGroup(scanner);
-                break;
-            case 3:
-                displayItemById(scanner);
-                break;
-            case 4:
-                break;
-            default:
-                System.out.println("Invalid choice. Please try again.");
+            String choiceInput = scanner.nextLine();
+            while (!isValidDisplayMenuChoice(choiceInput)) {
+                System.out.println("Invalid choice. Please enter a number between 1 and 4.");
+                choiceInput = scanner.nextLine();
+            }
+            int choice = Integer.parseInt(choiceInput);
+
+            switch (choice) {
+                case 1:
+                    displayAllItems();
+                    break;
+                case 2:
+                    displayItemsByGroup(scanner);
+                    break;
+                case 3:
+                    displayItemById(scanner);
+                    break;
+                case 4:
+                    exit = true;
+                    break;
+                default:
+                    System.out.println("Invalid choice. Please try again.");
+            }
         }
     }
 
@@ -427,6 +536,11 @@ public class Item {
             System.out.print("Choose an option: ");
             String choiceInput = scanner.nextLine();
             if (choiceInput.equalsIgnoreCase("e")) return;
+            while (choiceInput.isEmpty() || !isValidChoice(choiceInput, 6)) {
+                System.out.println("Invalid choice. Please enter a number between 1 and 6.");
+                choiceInput = scanner.nextLine();
+                if (choiceInput.equalsIgnoreCase("e")) return;
+            }
             int choice = Integer.parseInt(choiceInput);
 
             switch (choice) {
@@ -434,22 +548,24 @@ public class Item {
                     System.out.print("Enter new name: ");
                     String newName = scanner.nextLine();
                     if (newName.equalsIgnoreCase("e")) return;
-                    if (newName.isEmpty()) {
-                        System.out.println("Item name cannot be empty.");
-                    } else {
-                        item.setItemName(newName);
+                    while (newName.isEmpty()) {
+                        System.out.println("Item name cannot be empty. Please enter a valid item name.");
+                        newName = scanner.nextLine();
+                        if (newName.equalsIgnoreCase("e")) return;
                     }
+                    item.setItemName(newName);
                     break;
                 case 2:
                     System.out.print("Enter new quantity: ");
                     String quantityInput = scanner.nextLine();
                     if (quantityInput.equalsIgnoreCase("e")) return;
-                    int newQuantity = Integer.parseInt(quantityInput);
-                    if (newQuantity < 0) {
-                        System.out.println("Quantity cannot be negative.");
-                    } else {
-                        item.setItemQuantity(newQuantity);
+                    while (!isValidItemQuantity(quantityInput)) {
+                        System.out.println("Invalid quantity. Please enter a positive integer between 0 and 100.");
+                        quantityInput = scanner.nextLine();
+                        if (quantityInput.equalsIgnoreCase("e")) return;
                     }
+                    int newQuantity = Integer.parseInt(quantityInput);
+                    item.setItemQuantity(newQuantity);
                     break;
                 case 3:
                     System.out.println("Existing item groups:");
@@ -459,10 +575,20 @@ public class Item {
                     }
                     System.out.println((existingGroups.size() + 1) + ". Create new group");
 
-                    System.out.print("Choose an option: ");
-                    String groupChoiceInput = scanner.nextLine();
-                    if (groupChoiceInput.equalsIgnoreCase("e")) return;
-                    int groupChoice = Integer.parseInt(groupChoiceInput);
+                    int groupChoice = -1;
+                    while (groupChoice < 1 || groupChoice > existingGroups.size() + 1) {
+                        System.out.print("Choose an option: ");
+                        String groupChoiceInput = scanner.nextLine();
+                        if (groupChoiceInput.equalsIgnoreCase("e")) return;
+                        try {
+                            groupChoice = Integer.parseInt(groupChoiceInput);
+                            if (groupChoice < 1 || groupChoice > existingGroups.size() + 1) {
+                                System.out.println("Invalid choice. Please choose a valid option.");
+                            }
+                        } catch (NumberFormatException e) {
+                            System.out.println("Invalid input. Please enter a number.");
+                        }
+                    }
 
                     if (groupChoice > 0 && groupChoice <= existingGroups.size()) {
                         item.setItemGroup(existingGroups.get(groupChoice - 1));
@@ -470,38 +596,39 @@ public class Item {
                         System.out.print("Enter the new group name: ");
                         String groupName = scanner.nextLine();
                         if (groupName.equalsIgnoreCase("e")) return;
-                        if (groupName.isEmpty()) {
-                            System.out.println("Group name cannot be empty.");
-                        } else {
-                            ItemGroups newGroup = new ItemGroups(groupName);
-                            existingGroups.add(newGroup);
-                            item.setItemGroup(newGroup);
+                        while (groupName.isEmpty()) {
+                            System.out.println("Group name cannot be empty. Please enter a valid group name.");
+                            groupName = scanner.nextLine();
+                            if (groupName.equalsIgnoreCase("e")) return;
                         }
-                    } else {
-                        System.out.println("Invalid choice. Please try again.");
+                        ItemGroups newGroup = new ItemGroups(groupName);
+                        existingGroups.add(newGroup);
+                        item.setItemGroup(newGroup);
                     }
                     break;
                 case 4:
                     System.out.print("Enter new minimum stock level: ");
                     String minStockInput = scanner.nextLine();
                     if (minStockInput.equalsIgnoreCase("e")) return;
-                    int newMinInvLV = Integer.parseInt(minStockInput);
-                    if (newMinInvLV < 0) {
-                        System.out.println("Minimum stock level cannot be negative.");
-                    } else {
-                        item.setMinInvLV(newMinInvLV);
+                    while (!isValidMinStockLevel(minStockInput)) {
+                        System.out.println("Invalid minimum stock level. Please enter an integer between 1 and 100.");
+                        minStockInput = scanner.nextLine();
+                        if (minStockInput.equalsIgnoreCase("e")) return;
                     }
+                    int newMinInvLV = Integer.parseInt(minStockInput);
+                    item.setMinInvLV(newMinInvLV);
                     break;
                 case 5:
                     System.out.print("Enter new unit price: ");
                     String priceInput = scanner.nextLine();
                     if (priceInput.equalsIgnoreCase("e")) return;
-                    double newUnitPrice = Double.parseDouble(priceInput);
-                    if (newUnitPrice < 0) {
-                        System.out.println("Unit price cannot be negative.");
-                    } else {
-                        item.setUnitPrice(newUnitPrice);
+                    while (priceInput.isEmpty() || !isValidUnitPrice(priceInput)) {
+                        System.out.println("Invalid unit price. Please enter a value between 1 and 1000.");
+                        priceInput = scanner.nextLine();
+                        if (priceInput.equalsIgnoreCase("e")) return;
                     }
+                    double newUnitPrice = Double.parseDouble(priceInput);
+                    item.setUnitPrice(newUnitPrice);
                     break;
                 case 6:
                     editing = false;
@@ -526,9 +653,14 @@ public class Item {
         Item item = getInventory().get(itemId);
         if (item != null) {
             System.out.println("Current minimum stock level for " + item.getItemName() + ": " + item.getMinInvLV());
-            System.out.print("Enter the new minimum stock level: ");
+            System.out.print("Enter the new minimum stock level (1-100): ");
             String minStockInput = scanner.nextLine();
             if (minStockInput.equalsIgnoreCase("e")) return;
+            while (!isValidMinStockLevel(minStockInput)) {
+                System.out.println("Invalid minimum stock level. Please enter an integer between 1 and 100.");
+                minStockInput = scanner.nextLine();
+                if (minStockInput.equalsIgnoreCase("e")) return;
+            }
             int newMinInvLV = Integer.parseInt(minStockInput);
             item.setMinInvLV(newMinInvLV);
             System.out.println("New minimum stock level for " + item.getItemName() + ": " + item.getMinInvLV());
@@ -580,8 +712,13 @@ public class Item {
             System.out.println("6. Delete Item");
             System.out.println("7. Exit");
             System.out.print("Choose an option: ");
-            int choice = scanner.nextInt();
-            scanner.nextLine();
+
+            String choiceInput = scanner.nextLine();
+            while (!isValidMainMenuChoice(choiceInput)) {
+                System.out.println("Invalid choice. Please enter a number between 1 and 5.");
+                choiceInput = scanner.nextLine();
+            }
+            int choice = Integer.parseInt(choiceInput);
 
             switch (choice) {
                 case 1:
@@ -613,10 +750,66 @@ public class Item {
         scanner.close();
     }
 
+    // Validation methods
+    private static boolean isValidItemGroup(String choice, int maxSize) {
+        try {
+            int choiceInt = Integer.parseInt(choice);
+            return choiceInt > 0 && choiceInt <= maxSize + 1;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    private static boolean isValidItemQuantity(String quantityInput) {
+        try {
+            int quantity = Integer.parseInt(quantityInput);
+            return quantity >= 0 && quantity <= 100;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    private static boolean isValidMinStockLevel(String minStockInput) {
+        try {
+            int minStockLevel = Integer.parseInt(minStockInput);
+            return minStockLevel >= 1 && minStockLevel <= 100;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    private static boolean isValidUnitPrice(String priceInput) {
+        try {
+            double unitPrice = Double.parseDouble(priceInput);
+            return unitPrice >= 1 && unitPrice <= 1000;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    private static boolean isValidMainMenuChoice(String choiceInput) {
+        try {
+            int choice = Integer.parseInt(choiceInput);
+            return choice >= 1 && choice <= 7;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    private static boolean isValidDisplayMenuChoice(String choiceInput) {
+        try {
+            int choice = Integer.parseInt(choiceInput);
+            return choice >= 1 && choice <= 4;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    // Generate unique item ID
     public String generateItemId() {
         return String.format("I%04d", idCounter.incrementAndGet());
     }
-    
+
     //Add quantity after receiving order
     public static void addItemQty(String restockID, int restockQty){
         ArrayList<Item> tempItem = GoodsReceive.readAndSaveItem("items.txt");
@@ -627,7 +820,7 @@ public class Item {
             }
             index++;
         }
-        //Empty Item File for Overwritting
+        //Empty Item File for Overwriting
         try {
             new FileWriter("items.txt", false).close();
         } catch (IOException e) {
