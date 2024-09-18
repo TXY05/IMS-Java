@@ -14,6 +14,8 @@ import java.util.Scanner;
 public class IMS {
 
     public static void main(String[] args) throws FileNotFoundException, IOException {
+        dashboard();
+        systemPause();
         Scanner scanner = new Scanner(System.in);
         boolean endProgram = false;
         int choice = 0;
@@ -44,6 +46,7 @@ public class IMS {
                     } else {
                         System.out.println("\nLogin Success!");
                         systemPause();
+                        dashboard();
                     }
                     break;
                 case 2:
@@ -70,9 +73,13 @@ public class IMS {
     }
 
     public static void dashboard() {
+        Scanner scanner = new Scanner(System.in);
+        int choice = 0;
         header();
 
         Item item = new Item();
+        item.loadInventoryFromFile();
+
         Map<String, Item> inventory = item.getInventory();
         ArrayList<String> itemList = new ArrayList<>();
         int totalItem = 0;
@@ -98,27 +105,61 @@ public class IMS {
             totalItem++;
         }
 
-        PurchaseOrder po = new PurchaseOrder();
+        PurchaseOrder purchaseOrder = new PurchaseOrder();
+        ArrayList<PurchaseOrder> poList = purchaseOrder.getPOFromFile();
 
-        
-        
-        System.out.println("PRODUCT DETAILS");
-        System.out.println("Low Stock Items");
-        System.out.println("All Item Group");
-        System.out.println("Ail Items ");
+        for (PurchaseOrder po : poList) {
+            quantityOrdered += po.getItemCount();
+            totalCost += po.getTotalPOprice();
+            if (po.getStatus().equalsIgnoreCase("pending")) {
+                for (int i = 0; i < po.getItemCount(); i++) {
+                    quantityToReceive += po.getOrderItems().get(i).getQuantity();
+                }
+            }
+        }
+        do {
+            System.out.printf("\n%-35s%-40s%-40s\n", "PRODUCT DETAILS", "INVENTORY SUMMARY", "TOTAL PURCHASE ORDER");
+            System.out.printf("Low Stock Items     %-15d", lowStockItems);
+            System.out.printf("Quantity in HAND          %-14d", totalItemQuantity);
+            System.out.printf("Quantity Ordered    %-20d\n", quantityOrdered);
 
-        System.out.println("INVENTORY SUMMMARY");
-        System.out.println("Quantity in HAND");
-        System.out.println("Quantity to be RECEIVED");
+            System.out.printf("All Item Group      %-15d", itemGroup);
+            System.out.printf("Quantity to be RECEIVED   %-14d", quantityToReceive);
+            System.out.printf("Total Cost          RM%-18.2f\n", totalCost);
 
-        System.out.println("TOTAL PURCHASE ORDER");
-        System.out.println("Quantity Ordered");
-        System.out.println("Total Cose");
+            System.out.printf("Ail Items           %-15d\n\n", totalItem);
 
-        //lowLevelStock
-        //viewItem
-        //viewPO
-        //goodreturn
+            System.out.println("Low Stock Items List :");
+            for (int i = 0; i < lowStockItem.size(); i++) {
+                System.out.println(i + 1 + ". " + lowStockItem.get(i));
+            }
+
+            System.out.println("1. Purchase Order Menu");
+            System.out.println("2. Item Menu");
+            System.out.println("3. Supplier Menu");
+            System.out.println("4. Logout");
+            System.out.println("Enter your choice > ");
+            try{
+            choice = scanner.nextInt();
+            }catch(InputMismatchException e){
+                System.out.println("  Input Error, Please Try Again!!!");
+                scanner.nextLine();
+            }
+            switch (choice) {
+                case 1:
+                    PurchaseOrder.poMenu();
+                    break;
+                case 2:
+                    Item.manageInventory();
+                    break;
+                case 3:
+                    break;
+                case 4:
+                    break;
+                default:
+                    System.out.println("Input invalid. Please try again.");
+            }
+        } while (choice != 4);
     }
 
     public static void line() {

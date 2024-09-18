@@ -20,11 +20,10 @@ public class PurchaseOrder {
     private double totalPOprice;
     private int itemCount;
 
-    
-    public PurchaseOrder(){
-        
+    public PurchaseOrder() {
+
     }
-    
+
     // for saving
     public PurchaseOrder(ArrayList<OrderItem> orderItems, Supplier supp) {
         this.orderID = generatePOId();
@@ -93,6 +92,11 @@ public class PurchaseOrder {
             poID = String.format("PO%04d", idCounter.incrementAndGet());
         } while (existingIDs.contains(poID)); // Keep generating until a unique ID is found
         return poID;
+    }
+
+    public ArrayList<PurchaseOrder> getPOFromFile() {
+        ArrayList<PurchaseOrder> poList = readPOFromFile("PO.txt");
+        return poList;
     }
 
     public double calTotalPOprice(ArrayList<OrderItem> orderItems) {
@@ -434,7 +438,7 @@ public class PurchaseOrder {
         System.out.println("=======================================================================================================");
         System.out.println("  Items Selected: ");
         System.out.println("=======================================================================================================");
-        System.out.println("  No. \t Items \t\t\t Quantity \t   Unity Price \t\t Total Price");
+        System.out.println("  No. \t Items \t\t\t Quantity \t   Unit Price \t\t Total Price");
         System.out.println("=======================================================================================================");
 
         for (int i = 0; i < orderList.size(); i++) {
@@ -862,7 +866,7 @@ public class PurchaseOrder {
         System.out.printf("\n  %-20s", supp.getAddress().getAddress());
         System.out.printf("\n  %-20s          \t\t\t\t\t\t Date: ", supp.getAddress().getCity());
         System.out.printf("\n  %-6d      \t\t\t\t\t\t\t\t\t %s: ", supp.getAddress().getPostalCode(), po.getOrderDate());
-        System.out.println("\n\n  ItemID \t Items \t\t\t Quantity \t   Unity Price \t\t Total Price");
+        System.out.println("\n\n  ItemID \t Items \t\t\t Quantity \t   Unit Price \t\t Total Price");
         System.out.println("=======================================================================================================");
 
         for (int i = 0; i < po.getItemCount(); i++) {
@@ -883,7 +887,7 @@ public class PurchaseOrder {
             System.out.printf("\n  Status : %s\n", po.getStatus());
             System.out.println("  ====================");
             System.out.println("  Return Items : ");
-            System.out.println("\n  ItemID \t Items \t\t\t Quantity \t   Unity Price \t\t Total Price");
+            System.out.println("\n  ItemID \t Items \t\t\t Quantity \t   Unit Price \t\t Total Price");
             System.out.println("=======================================================================================================");
 
             for (GoodsReturn gr : goodsReturn) {

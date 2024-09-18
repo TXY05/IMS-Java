@@ -84,7 +84,7 @@ public class Supplier extends Person {
                 ArrayList<String> itemList = new ArrayList<>();
 
                 String[] row = supplier.decryption(line).split("[|]");
-                                
+
                 String[] item = row[6].split(",");
                 for (String i : item) {
                     itemList.add(i);
@@ -331,13 +331,12 @@ public class Supplier extends Person {
                 }
             } while (invalid);
         } while (!finish);
-        String plainText = new String(Supplier.generateSupplierId() + "|" + name + "|" + email + "|" + address + "|" + city + "|" + postalCode+"|");
+        String plainText = new String(Supplier.generateSupplierId() + "|" + name + "|" + email + "|" + address + "|" + city + "|" + postalCode + "|");
 
         for (String items : itemList) {
             plainText = plainText + items + ",";
         }
         plainText = plainText.substring(0, plainText.length() - 1);
-
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(supplierFile, true))) {
             String encryptedText = supplier.encryption(plainText);
@@ -355,7 +354,6 @@ public class Supplier extends Person {
 
         return true;
     }
-
 
     public static String generateSupplierId() {
         String supplierID = String.format("S%04d", supplierCount);
