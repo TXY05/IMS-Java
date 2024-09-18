@@ -14,8 +14,6 @@ import java.util.Scanner;
 public class IMS {
 
     public static void main(String[] args) throws FileNotFoundException, IOException {
-        dashboard();
-        systemPause();
         Scanner scanner = new Scanner(System.in);
         boolean endProgram = false;
         int choice = 0;
@@ -75,7 +73,6 @@ public class IMS {
     public static void dashboard() {
         Scanner scanner = new Scanner(System.in);
         int choice = 0;
-        header();
 
         Item item = new Item();
         item.loadInventoryFromFile();
@@ -118,6 +115,8 @@ public class IMS {
             }
         }
         do {
+
+            header();
             System.out.printf("\n%-35s%-40s%-40s\n", "PRODUCT DETAILS", "INVENTORY SUMMARY", "TOTAL PURCHASE ORDER");
             System.out.printf("Low Stock Items     %-15d", lowStockItems);
             System.out.printf("Quantity in HAND          %-14d", totalItemQuantity);
@@ -134,14 +133,13 @@ public class IMS {
                 System.out.println(i + 1 + ". " + lowStockItem.get(i));
             }
 
-            System.out.println("1. Purchase Order Menu");
+            System.out.println("\n\n1. Purchase Order Menu");
             System.out.println("2. Item Menu");
-            System.out.println("3. Supplier Menu");
-            System.out.println("4. Logout");
-            System.out.println("Enter your choice > ");
-            try{
-            choice = scanner.nextInt();
-            }catch(InputMismatchException e){
+            System.out.println("3. Logout");
+            System.out.print("Enter your choice > ");
+            try {
+                choice = scanner.nextInt();
+            } catch (InputMismatchException e) {
                 System.out.println("  Input Error, Please Try Again!!!");
                 scanner.nextLine();
             }
@@ -154,12 +152,10 @@ public class IMS {
                     break;
                 case 3:
                     break;
-                case 4:
-                    break;
                 default:
                     System.out.println("Input invalid. Please try again.");
             }
-        } while (choice != 4);
+        } while (choice != 3);
     }
 
     public static void line() {

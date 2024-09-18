@@ -1,3 +1,4 @@
+
 import java.io.*;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -45,38 +46,38 @@ public class User extends Person {
     }
 
     public boolean login() {
-        boolean invalid=false;
+        boolean invalid = false;
         String email;
         String password;
-        String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\."+ 
-                            "[a-zA-Z0-9_+&*-]+)*@" + 
-                            "(?:[a-zA-Z0-9-]+\\.)+[a-z" + 
-                            "A-Z]{2,7}$";
-        
+        String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\."
+                + "[a-zA-Z0-9_+&*-]+)*@"
+                + "(?:[a-zA-Z0-9-]+\\.)+[a-z"
+                + "A-Z]{2,7}$";
+
         System.out.println("\n=====================");
         System.out.println("      Login Menu");
         System.out.println("  Enter \"E\" To Exit");
         System.out.println("=====================");
-        do{
-            invalid=false;
+        do {
+            invalid = false;
             System.out.print("Enter Email > ");
             email = scanner.nextLine();
-            if(email.equalsIgnoreCase("e")){
+            if (email.equalsIgnoreCase("e")) {
                 return false;
-            }else if(email==null||!Pattern.compile(emailRegex).matcher(email).matches()){
-                invalid=true;
+            } else if (email == null || !Pattern.compile(emailRegex).matcher(email).matches()) {
+                invalid = true;
                 System.out.println("Email invalid! Please try again!");
             }
-        }while(invalid);
-        
+        } while (invalid);
+
         System.out.print("Enter Password > ");
         password = scanner.nextLine();
-        if(password.equalsIgnoreCase("e")){
+        if (password.equalsIgnoreCase("e")) {
             return false;
         }
-        
+
         User user = new User();
-        
+
         try {
             reader = new BufferedReader(new FileReader(userFile));
             while ((line = reader.readLine()) != null) {
@@ -102,61 +103,56 @@ public class User extends Person {
     }
 
     public boolean signup() {
-        boolean invalid=false;
-        String name=null;
-        String email=null;
-        String password=null;
-        String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\."+ 
-                            "[a-zA-Z0-9_+&*-]+)*@" + 
-                            "(?:[a-zA-Z0-9-]+\\.)+[a-z" + 
-                            "A-Z]{2,7}$"; 
-        
-        
+        boolean invalid = false;
+        String name = null;
+        String email = null;
+        String password = null;
+        String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\."
+                + "[a-zA-Z0-9_+&*-]+)*@"
+                + "(?:[a-zA-Z0-9-]+\\.)+[a-z"
+                + "A-Z]{2,7}$";
+
         System.out.println("\n=====================");
         System.out.println("    Sign Up Menu");
         System.out.println("  Enter \"E\" To Exit");
         System.out.println("=====================");
-        do{
-            invalid=false;
+        do {
+            invalid = false;
             System.out.print("Enter Name > ");
-            name = scanner.nextLine();        
-            
-            if(name.equalsIgnoreCase("e")){
+            name = scanner.nextLine();
+
+            if (name.equalsIgnoreCase("e")) {
                 return false;
-            }else if(name==null||name.isEmpty()){
-                invalid=true;
+            } else if (name == null || name.isEmpty()) {
+                invalid = true;
                 System.out.println("Name invalid! Please try again!");
-            }        
-        }while(invalid);
-        
-        
-        do{
-            invalid=false;
+            }
+        } while (invalid);
+
+        do {
+            invalid = false;
             System.out.print("Enter Email > ");
             email = scanner.nextLine();
-            if(email.equalsIgnoreCase("e")){
+            if (email.equalsIgnoreCase("e")) {
                 return false;
-            }else if(email==null||!Pattern.compile(emailRegex).matcher(email).matches()||email.isEmpty()){
-                invalid=true;
+            } else if (email == null || !Pattern.compile(emailRegex).matcher(email).matches() || email.isEmpty()) {
+                invalid = true;
                 System.out.println("Email invalid! Please try again!");
             }
-        }while(invalid);
-        
-        
-        do{
-            invalid=false;
+        } while (invalid);
+
+        do {
+            invalid = false;
             System.out.print("Enter Password > ");
             password = scanner.nextLine();
-            if(password.equalsIgnoreCase("e")){
+            if (password.equalsIgnoreCase("e")) {
                 return false;
-            }else if(password==null||password.length()<8||password.isEmpty()){
-                invalid=true;
+            } else if (password == null || password.length() < 8 || password.isEmpty()) {
+                invalid = true;
                 System.out.println("Password is invalid! A minimum length of 8 characters is required!");
             }
-        }while(invalid);
-        
-        
-        
+        } while (invalid);
+
         User user = new User();
 
         try {
@@ -181,7 +177,7 @@ public class User extends Person {
         }
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(userFile, true))) {
-            String encryptedText = user.encryption(name+"|"+email+"|"+password);
+            String encryptedText = user.encryption(name + "|" + email + "|" + password);
             writer.append(encryptedText);
             writer.newLine();
         } catch (IOException e) {
@@ -195,16 +191,16 @@ public class User extends Person {
         }
         return true;
     }
-    
-     public String encryption (String line)throws NoSuchAlgorithmException,NoSuchPaddingException,InvalidKeyException{
+
+    public String encryption(String line) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException {
         SecretKey secretKey = null;
         byte[] encryptedBytes = null;
 
         // Load the secret key from file
         try (BufferedReader br = new BufferedReader(new FileReader("secretKey.txt"))) {
             String row = br.readLine();
-            byte[] decodedKey = Base64.getDecoder().decode(row); 
-            secretKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES"); 
+            byte[] decodedKey = Base64.getDecoder().decode(row);
+            secretKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
         } catch (IOException e) {
             e.printStackTrace();
             System.out.println("Unable to Open File !!!");
@@ -212,11 +208,10 @@ public class User extends Person {
         }
 
         try {
-            
-            Cipher cipher = Cipher.getInstance("AES"); 
-            cipher.init(Cipher.ENCRYPT_MODE, secretKey); 
 
-            
+            Cipher cipher = Cipher.getInstance("AES");
+            cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+
             encryptedBytes = cipher.doFinal(line.getBytes());
 
         } catch (Exception e) {
@@ -224,30 +219,28 @@ public class User extends Person {
             return null;
         }
 
-        
         return Base64.getEncoder().encodeToString(encryptedBytes);
     }
-     
-    public String decryption(String line)throws NoSuchAlgorithmException,NoSuchPaddingException,InvalidKeyException{
+
+    public String decryption(String line) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException {
         String encodedKey;
         SecretKey secretKey = null;
         byte[] decryptedBytes = null;
-        
+
         try (BufferedReader br = new BufferedReader(new FileReader("secretKey.txt"))) {
             String row = br.readLine();
             byte[] decodedKey = Base64.getDecoder().decode(row);
-            
-         secretKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
+
+            secretKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
         } catch (IOException e) {
             e.printStackTrace();
             System.out.println("Unable to Open File !!!");
         }
-        
-           
+
         Cipher cipher = Cipher.getInstance("AES");
-            
-        cipher.init(Cipher.DECRYPT_MODE,secretKey);
-         
+
+        cipher.init(Cipher.DECRYPT_MODE, secretKey);
+
         try {
             decryptedBytes = cipher.doFinal(Base64.getDecoder().decode(line));
         } catch (IllegalBlockSizeException ex) {
@@ -255,11 +248,11 @@ public class User extends Person {
         } catch (BadPaddingException ex) {
             Logger.getLogger(Supplier.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+
         String plainText = new String(decryptedBytes);
-        
+
         return plainText;
-        
+
     }
 
 }

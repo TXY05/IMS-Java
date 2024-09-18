@@ -720,7 +720,7 @@ public class Item {
 
             String choiceInput = scanner.nextLine();
             while (!isValidMainMenuChoice(choiceInput)) {
-                System.out.println("Invalid choice. Please enter a number between 1 and 5.");
+                System.out.println("Invalid choice. Please enter a number between 1 and 7.");
                 choiceInput = scanner.nextLine();
             }
             int choice = Integer.parseInt(choiceInput);
@@ -747,7 +747,7 @@ public class Item {
                 case 7:
                     saveInventoryToFile(); // Save inventory to file before exiting
                     exit = true;
-                    break;
+                    return;
                 default:
                     System.out.println("Invalid choice. Please try again.");
             }
