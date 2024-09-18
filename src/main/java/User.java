@@ -106,12 +106,10 @@ public class User extends Person {
         String name=null;
         String email=null;
         String password=null;
-        String regex = "[a-zA-Z\\\\s]+"; 
         String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\."+ 
                             "[a-zA-Z0-9_+&*-]+)*@" + 
                             "(?:[a-zA-Z0-9-]+\\.)+[a-z" + 
                             "A-Z]{2,7}$"; 
-        
         
         
         System.out.println("\n=====================");
@@ -125,7 +123,7 @@ public class User extends Person {
             
             if(name.equalsIgnoreCase("e")){
                 return false;
-            }else if(name==null||!Pattern.compile(regex).matcher(name).matches()){
+            }else if(name==null||name.isEmpty()){
                 invalid=true;
                 System.out.println("Name invalid! Please try again!");
             }        
@@ -138,7 +136,7 @@ public class User extends Person {
             email = scanner.nextLine();
             if(email.equalsIgnoreCase("e")){
                 return false;
-            }else if(email==null||!Pattern.compile(emailRegex).matcher(email).matches()){
+            }else if(email==null||!Pattern.compile(emailRegex).matcher(email).matches()||email.isEmpty()){
                 invalid=true;
                 System.out.println("Email invalid! Please try again!");
             }
@@ -151,11 +149,13 @@ public class User extends Person {
             password = scanner.nextLine();
             if(password.equalsIgnoreCase("e")){
                 return false;
-            }else if(password==null||password.length()<8){
+            }else if(password==null||password.length()<8||password.isEmpty()){
                 invalid=true;
                 System.out.println("Password is invalid! A minimum length of 8 characters is required!");
             }
         }while(invalid);
+        
+        
         
         User user = new User();
 
@@ -163,11 +163,7 @@ public class User extends Person {
             reader = new BufferedReader(new FileReader(userFile));
             while ((line = reader.readLine()) != null) {
                 String decodedText = user.decryption(line);
-                System.out.println("this   "+decodedText);
                 String[] row = decodedText.split("[|]");
-                for(String i:row){
-                    System.out.println("this2   "+i);
-                }
                 if (email.compareTo(row[1]) == 0) {
                     System.out.println("Email repeated! Please try again!");
                     return false;
@@ -185,7 +181,7 @@ public class User extends Person {
         }
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(userFile, true))) {
-            String encryptedText = user.encryption(name+"|"+email+"|"+password+"|");
+            String encryptedText = user.encryption(name+"|"+email+"|"+password);
             writer.append(encryptedText);
             writer.newLine();
         } catch (IOException e) {

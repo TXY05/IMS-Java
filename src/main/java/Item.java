@@ -13,7 +13,7 @@ public class Item {
     private String itemName;
     private int itemQuantity;
     private ItemGroups itemGroup;  // Association with ItemGroups
-    private final String itemId;
+    private String itemId;
     private static final Map<String, Item> inventory = new TreeMap<>();
     private double unitPrice;
     private int minInvLV;
@@ -31,6 +31,10 @@ public class Item {
         this.itemId = generateItemId();  // Automatically generate ID
         getInventory().put(this.itemId, this);  // Add item to inventory
         itemGroup.addItem(this);  // Add item to group
+    }
+    
+    public Item(){
+        
     }
 
     public Item(String itemId, String itemName){
@@ -109,6 +113,12 @@ public class Item {
             throw new IllegalArgumentException("Minimum inventory level cannot be negative.");
         }
         this.minInvLV = minInvLV;
+    }
+
+    
+    public static int getNumberOfItemsAvailable() {
+        
+        return inventory.size();
     }
 
     // Static Methods
@@ -470,7 +480,8 @@ public class Item {
         }
     }
 
-    private static void displayAllItems() {
+    public static void displayAllItems() {
+        
         System.out.println("\nCurrent Inventory:");
         System.out.printf("%-10s | %-20s | %-10s | %-15s | %-10s | %-10s%n", "ID", "Name", "Quantity", "Category", "Min Stock", "Unit Price");
         System.out.println("------------------------------------------------------------------------------------------");

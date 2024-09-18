@@ -37,14 +37,10 @@ public class IMS {
                     endProgram = user.login();
                     if (!endProgram) {
                         System.out.println("\nLogin Failed! Please try again later!");
-                        System.out.println("Press Enter to Continue...");
-                        scanner.nextLine();
-                        scanner.nextLine();
+                        systemPause();
                     } else{
                         System.out.println("\nLogin Success!");
-                        System.out.println("Press Enter to Continue...");
-                        scanner.nextLine();
-                        scanner.nextLine();
+                        systemPause();  
                     }
                     break;
                 case 2:
@@ -56,9 +52,7 @@ public class IMS {
                         scanner.nextLine();
                     } else{
                         System.out.println("\nRegister Success!");
-                        System.out.println("Press Enter to Continue...");
-                        scanner.nextLine();
-                        scanner.nextLine();
+                        systemPause();
                     }
                     break;
                 case 3:

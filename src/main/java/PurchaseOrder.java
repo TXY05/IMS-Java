@@ -116,7 +116,9 @@ public class PurchaseOrder {
         }
         return ListItems;
     }
-    
+    public static void main(String[] args) {
+        poMenu();
+    }
     public static void poMenu(){
         Scanner sc = new Scanner(System.in);
         boolean leave = true, error;
