@@ -35,10 +35,10 @@ public class GoodsReturn {
         boolean invalid;
         boolean invalidQty;
         int max = goodsReturn.getOrderItems().size();
-        int returnQty[] = new int[goodsReturn.getItemCount()];
+        int returnQty[] = new int[max];
         Arrays.fill(returnQty, 0); //Initialize all returnQty with 0
-        int leftQty[] = new int[goodsReturn.getItemCount()];
-        double leftCost[] = new double[goodsReturn.getItemCount()];
+        int leftQty[] = new int[max];
+        double leftCost[] = new double[max];
         int index = 0;
         
         while(!leave){
@@ -73,7 +73,7 @@ public class GoodsReturn {
                                     leave = true;
                                     invalidQty = false;
                                 }
-                                else if(returnQty[index - 1] < 1 || returnQty[index - 1] > goodsReturn.getOrderItems().get(index-1).getQuantity()){ //Detect Invalid Input
+                                else if(returnQty[index - 1] < 0 || returnQty[index - 1] > goodsReturn.getOrderItems().get(index-1).getQuantity()){ //Detect Invalid Input
                                     invalidQty = true;
                                     System.out.println("Please enter quantity within the range.\n");
                                 }
@@ -91,32 +91,44 @@ public class GoodsReturn {
                 }catch (InputMismatchException e){
                     String input = sc.next().toUpperCase(); //Get To Upper Case
                     if(input.equals("Y")){ //If Y to Complete Return
-                        ArrayList<PurchaseOrder> purchaseOrder = PurchaseOrder.readPOFromFile("PO.txt");
-                        invalid = false;
-                        leave = true;
-                        //Empty Purchase Order File for Overwritting
-                        try {
-                            new FileWriter("PO.txt", false).close();
-                        } catch (IOException j) {
-                            System.out.println("Empty file failed!");
+                        int totalRtnQty = 0; //Check if user return anything
+                        for (int i = 0; i < max; i++){
+                            totalRtnQty += returnQty[i];
                         }
-                        //Save all back into Purchase Order File with Updated Status
-                        for (PurchaseOrder purchaseOrder1 : purchaseOrder) {
-                        if (goodsReturn.getOrderID().equals(purchaseOrder1.getOrderID())) {
-                            purchaseOrder1.setStatus("Return");
-                            GoodsReceive.saveStatusTOPO(purchaseOrder1);
-                        } else {
-                            GoodsReceive.saveStatusTOPO(purchaseOrder1);
+                        if(totalRtnQty == 0){
+                            System.out.println("Please atleast return one of the item!");
+                            System.out.println("Use -1 to Exit.");
+                            IMS.systemPause();
+                            invalid = true;
                         }
-                    }
-                    //Add Quantity into Item File
-                    for(int i = 0; i < max; i++){
-                        Item.addItemQty(goodsReturn.getOrderItems().get(i).getOrdItemID(), leftQty[i]);
-                    }
-                    //Save Goods Return To Goods Return File
-                    saveGoodsReturnToFile(goodsReturn, returnQty);
-                    System.out.println("Successfully Returned.");
-                    IMS.systemPause();
+                        else{
+                            ArrayList<PurchaseOrder> purchaseOrder = PurchaseOrder.readPOFromFile("PO.txt");
+                            invalid = false;
+                            leave = true;
+                            //Empty Purchase Order File for Overwritting
+                            try {
+                                new FileWriter("PO.txt", false).close();
+                            } catch (IOException j) {
+                                System.out.println("Empty file failed!");
+                            }
+                            //Save all back into Purchase Order File with Updated Status
+                            for (PurchaseOrder purchaseOrder1 : purchaseOrder) {
+                                if (goodsReturn.getOrderID().equals(purchaseOrder1.getOrderID())) {
+                                    purchaseOrder1.setStatus("Return");
+                                    GoodsReceive.saveStatusTOPO(purchaseOrder1);
+                                } else {
+                                    GoodsReceive.saveStatusTOPO(purchaseOrder1);
+                                }
+                            }
+                            //Add Quantity into Item File
+                            for(int i = 0; i < max; i++){
+                                Item.addItemQty(goodsReturn.getOrderItems().get(i).getOrdItemID(), leftQty[i]);
+                            }
+                            //Save Goods Return To Goods Return File
+                            saveGoodsReturnToFile(goodsReturn, returnQty);
+                            System.out.println("Successfully Returned.");
+                            IMS.systemPause();
+                        }
                     }
                     else{ //Invalid Option
                         System.out.println("Please Enter Integer/-1 to Exit!\n");
