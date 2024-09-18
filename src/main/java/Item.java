@@ -48,6 +48,10 @@ public class Item {
     }
 
     // Getters and Setters
+    public static int getNumberOfItemsAvailable() {
+        return inventory.size();
+    }
+
     public String getItemName() {
         return itemName;
     }
