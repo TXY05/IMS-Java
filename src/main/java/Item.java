@@ -19,18 +19,28 @@ public class Item {
     private int minInvLV;
 
     // Constructors
-    public Item(String itemName, int itemQuantity, ItemGroups itemGroup, int minInvLV) {
+    public Item(String itemName, int itemQuantity, ItemGroups itemGroup, int minInvLV, double unitPrice) {
         this.itemName = itemName;
         this.itemQuantity = itemQuantity;
         this.itemGroup = itemGroup;
         this.minInvLV = minInvLV;
+        this.unitPrice = unitPrice;
         this.itemId = generateItemId();  // Automatically generate ID
         getInventory().put(this.itemId, this);  // Add item to inventory
         itemGroup.addItem(this);  // Add item to group
     }
-    
+
     public Item(){
-        
+
+    }
+
+    public Item(String itemId, String itemName, int itemQuantity, ItemGroups itemGroup, int minInvLV, double unitPrice) {
+        this.itemId = itemId;
+        this.itemName = itemName;
+        this.itemQuantity = itemQuantity;
+        this.itemGroup = itemGroup;
+        this.minInvLV = minInvLV;
+        inventory.put(itemId, this);
     }
 
     public Item(String itemId, String itemName){
@@ -133,21 +143,26 @@ public class Item {
         try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
             String line;
             Map<String, ItemGroups> groupMap = new TreeMap<>();
+            Set<String> itemIds = new HashSet<>(); // To track unique item IDs
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split(",");
-                if (parts.length == 6) {  // Adjusted to 6 to include unitPrice
+                if (parts.length == 6) {  // Check if line is valid
                     String itemId = parts[0];
+                    if (itemIds.contains(itemId)) {
+                        continue; // Skip duplicate item
+                    }
+                    itemIds.add(itemId);
                     String itemName = parts[1];
                     int itemQuantity = Integer.parseInt(parts[2]);
                     String groupName = parts[3];
                     int minInvLV = Integer.parseInt(parts[4]);
                     double unitPrice = Double.parseDouble(parts[5]);
                     ItemGroups itemGroup = groupMap.computeIfAbsent(groupName, ItemGroups::new);
-                    Item item = new Item(itemName, itemQuantity, itemGroup, minInvLV);
-                    item.setUnitPrice(unitPrice);
+                    Item item = new Item(itemId, itemName, itemQuantity, itemGroup, minInvLV, unitPrice);
                     getInventory().put(itemId, item);
                 }
             }
+            initializeIdCounter();
         } catch (IOException e) {
             System.out.println("Can't Read File");
         }
@@ -413,7 +428,7 @@ public class Item {
             existingGroups.add(itemGroup);
         }
 
-        Item newItem = new Item(itemName, itemQuantity, itemGroup, minInvLV);
+        Item newItem = new Item(itemName, itemQuantity, itemGroup, minInvLV, unitPrice);
         newItem.setUnitPrice(unitPrice);
         getInventory().put(newItem.getItemId(), newItem);
         saveInventoryToFile();
@@ -471,7 +486,6 @@ public class Item {
     }
 
     public static void displayAllItems() {
-        
         System.out.println("\nCurrent Inventory:");
         System.out.printf("%-10s | %-20s | %-10s | %-15s | %-10s | %-10s%n", "ID", "Name", "Quantity", "Category", "Min Stock", "Unit Price");
         System.out.println("------------------------------------------------------------------------------------------");
@@ -813,6 +827,19 @@ public class Item {
     // Generate unique item ID
     public String generateItemId() {
         return String.format("I%04d", idCounter.incrementAndGet());
+    }
+
+    public static void initializeIdCounter() {
+        int maxId = inventory.keySet().stream()
+                .mapToInt(id -> Integer.parseInt(id.substring(1)))
+                .max()
+                .orElse(0);
+        idCounter.set(maxId);
+
+        // Ensure the counter skips any existing IDs
+        while (inventory.containsKey(String.format("I%04d", idCounter.get()))) {
+            idCounter.incrementAndGet();
+        }
     }
 
     //Add quantity after receiving order
