@@ -18,10 +18,6 @@ public class Item {
     private double unitPrice;
     private int minInvLV;
 
-    public static void main(String[] args) {
-        manageInventory();
-    }
-
     // Constructors
     public Item(String itemName, int itemQuantity, ItemGroups itemGroup, int minInvLV) {
         this.itemName = itemName;
@@ -113,12 +109,6 @@ public class Item {
             throw new IllegalArgumentException("Minimum inventory level cannot be negative.");
         }
         this.minInvLV = minInvLV;
-    }
-
-    
-    public static int getNumberOfItemsAvailable() {
-        
-        return inventory.size();
     }
 
     // Static Methods

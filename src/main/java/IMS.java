@@ -1,3 +1,4 @@
+
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -5,16 +6,18 @@ import java.time.DayOfWeek;
 import java.time.LocalTime;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.InputMismatchException;
+import java.util.Map;
 import java.util.Scanner;
 
 public class IMS {
 
     public static void main(String[] args) throws FileNotFoundException, IOException {
         Scanner scanner = new Scanner(System.in);
-        boolean endProgram=false;
+        boolean endProgram = false;
         int choice = 0;
-                
+
         User user = new User();
 
         do {
@@ -31,16 +34,16 @@ public class IMS {
                 System.out.println("Invalid input. Please enter a valid integer.");
                 scanner.next();  // Clear the invalid input from the scanner buffer
             }
-            
+
             switch (choice) {
                 case 1:
                     endProgram = user.login();
                     if (!endProgram) {
                         System.out.println("\nLogin Failed! Please try again later!");
                         systemPause();
-                    } else{
+                    } else {
                         System.out.println("\nLogin Success!");
-                        systemPause();  
+                        systemPause();
                     }
                     break;
                 case 2:
@@ -50,7 +53,7 @@ public class IMS {
                         System.out.println("Press Enter to Continue...");
                         scanner.nextLine();
                         scanner.nextLine();
-                    } else{
+                    } else {
                         System.out.println("\nRegister Success!");
                         systemPause();
                     }
@@ -62,18 +65,61 @@ public class IMS {
                     System.out.println("Invalid input.");
             }
             clearConsole();
-        } while (choice !=3);
+        } while (choice != 3);
 
     }
-    
-    public static void dashboard(){
+
+    public static void dashboard() {
         header();
+
+        Item item = new Item();
+        Map<String, Item> inventory = item.getInventory();
+        ArrayList<String> itemList = new ArrayList<>();
+        int totalItem = 0;
+        int totalItemQuantity = 0;
+        int itemGroup = 0;
+        int lowStockItems = 0;
+        ArrayList<String> lowStockItem = new ArrayList<>();
+        int quantityOrdered = 0;
+        float totalCost = 0;
+        int quantityToReceive = 0;
+        ArrayList<String> itemGroups = new ArrayList<>();
+
+        for (Item items : inventory.values()) {
+            if (items.getItemQuantity() < items.getMinInvLV()) {
+                lowStockItem.add(items.getItemId());
+                lowStockItems++;
+            }
+            if (!itemGroups.contains(items.getItemGroup().getGroupName())) {
+                itemGroups.add(items.getItemGroup().getGroupName());
+                itemGroup++;
+            }
+            totalItemQuantity += items.getItemQuantity();
+            totalItem++;
+        }
+
+        PurchaseOrder po = new PurchaseOrder();
+
+        
+        
+        System.out.println("PRODUCT DETAILS");
+        System.out.println("Low Stock Items");
+        System.out.println("All Item Group");
+        System.out.println("Ail Items ");
+
+        System.out.println("INVENTORY SUMMMARY");
+        System.out.println("Quantity in HAND");
+        System.out.println("Quantity to be RECEIVED");
+
+        System.out.println("TOTAL PURCHASE ORDER");
+        System.out.println("Quantity Ordered");
+        System.out.println("Total Cose");
+
         //lowLevelStock
         //viewItem
         //viewPO
         //goodreturn
     }
-    
 
     public static void line() {
         System.out.println("==========================================================================================================");
@@ -122,8 +168,8 @@ public class IMS {
             e.printStackTrace();
         }
     }
-    
-    public static void systemPause(){
+
+    public static void systemPause() {
         Scanner sc = new Scanner(System.in);
         System.out.println("\nPress Enter to continue...");
         sc.nextLine();

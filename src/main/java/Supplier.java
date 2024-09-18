@@ -84,15 +84,10 @@ public class Supplier extends Person {
                 ArrayList<String> itemList = new ArrayList<>();
 
                 String[] row = supplier.decryption(line).split("[|]");
-                for(String i : row){
-                    System.out.println(i);
-                }
-                
-                
+                                
                 String[] item = row[6].split(",");
                 for (String i : item) {
                     itemList.add(i);
-                    System.out.println(i);
                 }
                 suppliers.add(new Supplier(row[0], row[1], row[2], new Address(row[3], row[4], Integer.parseInt(row[5])), itemList));
             }
