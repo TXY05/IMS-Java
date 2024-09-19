@@ -137,9 +137,9 @@ public class GoodsReturn {
 
     //Display Goods Return
     private static void showGoodsReturn(PurchaseOrder goodsReturn, int returnQty[], int leftQty[], double leftCost[]) {
-        System.out.println("\n==============================");
-        System.out.printf("%20s\n", "Goods Return");
-        System.out.println("==============================");
+        System.out.println("\n==================================================");
+        System.out.printf("%30s\n", "Goods Return");
+        System.out.println("==================================================");
         System.out.printf("%s %-10s %-20s %-5s %s\n", "No", "Item ID", "Item Name", "Qty", "Total Cost");
 
         for (int i = 0; i < goodsReturn.getItemCount(); i++) {
@@ -155,7 +155,7 @@ public class GoodsReturn {
             System.out.printf("%s %d\n", "Amount of Return:", returnQty[i]);
             System.out.printf("%s %d\n", "Quantity Left:", leftQty[i]);
             System.out.printf("%s %.2f\n", "Cost Left:", leftCost[i]);
-            System.out.println("------------------------------");
+            System.out.println("--------------------------------------------------");
         }
     }
 

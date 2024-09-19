@@ -68,9 +68,9 @@ public class GoodsReceive {
     private static void displayGoodReceive(ArrayList<PurchaseOrder> goodsReceive) {
         int max = goodsReceive.size();
 
-        System.out.println("\n==============================");
-        System.out.printf("%20s\n", "Goods Receive");
-        System.out.println("==============================");
+        System.out.println("\n==================================================");
+        System.out.printf("%30s\n", "Goods Receive");
+        System.out.println("==================================================");
         System.out.println("Purchase Order");
         System.out.println("--------------");
 
@@ -86,7 +86,7 @@ public class GoodsReceive {
                 String itemName = PurchaseOrder.findItemName(goodsReceive.get(i), j);
                 System.out.print(itemName + " ");
             }
-            System.out.println("\n------------------------------");
+            System.out.println("\n--------------------------------------------------");
         }
     }
 
@@ -95,9 +95,9 @@ public class GoodsReceive {
         Supplier supplier = PurchaseOrder.findSupplier(goodsReceive.getSuppID());
         int itemNum = goodsReceive.getItemCount();
 
-        System.out.println("\n==============================");
+        System.out.println("\n==================================================");
         System.out.printf("%-10s %s\n", goodsReceive.getOrderID(), supplier.getName());
-        System.out.println("------------------------------");
+        System.out.println("--------------------------------------------------");
         System.out.printf("%s %-10s %-20s %-5s %s\n", "No", "Item ID", "Item Name", "Qty", "Total Cost");
 
         for (int i = 0; i < itemNum; i++) {
