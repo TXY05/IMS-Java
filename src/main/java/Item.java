@@ -40,6 +40,7 @@ public class Item {
         this.itemQuantity = itemQuantity;
         this.itemGroup = itemGroup;
         this.minInvLV = minInvLV;
+        this.unitPrice = unitPrice;
         inventory.put(itemId, this);
     }
 
@@ -162,10 +163,11 @@ public class Item {
                     getInventory().put(itemId, item);
                 }
             }
-            initializeIdCounter();
+
         } catch (IOException e) {
             System.out.println("Can't Read File");
         }
+        initializeIdCounter();  // Initialize ID counter
     }
 
     public static void promptUserToEditItemQuantity() {
@@ -689,31 +691,6 @@ public class Item {
         }
     }
 
-    public static void promptUserToDeleteItem() {
-        Scanner scanner = new Scanner(System.in);
-
-        System.out.print("\nPress 'e' to exit at any time.");
-        System.out.print("\nEnter the item ID to delete: ");
-        String itemId = scanner.nextLine();
-        if (itemId.equalsIgnoreCase("e")) return;
-
-        if (itemId.isEmpty()) {
-            System.out.println("Item ID cannot be empty.");
-            return;
-        }
-
-        Item item = getInventory().get(itemId);
-        if (item != null) {
-            item.getItemGroup().getItems().remove(item);
-            getInventory().remove(itemId);
-            saveInventoryToFile();
-            System.out.println("Item " + item.getItemName() + " deleted successfully.");
-            removeEmptyGroups();
-        } else {
-            System.out.println("Item ID not found in inventory.");
-        }
-    }
-
     public static void manageInventory() {
         Scanner scanner = new Scanner(System.in);
         boolean exit = false;
@@ -728,8 +705,7 @@ public class Item {
             System.out.println("3. Edit Item Details");
             System.out.println("4. Edit Min Stock Level");
             System.out.println("5. Display Inventory");
-            System.out.println("6. Delete Item");
-            System.out.println("7. Exit");
+            System.out.println("6. Exit");
             System.out.print("Choose an option: ");
 
             String choiceInput = scanner.nextLine();
@@ -756,9 +732,6 @@ public class Item {
                     displayInventory(); // Display inventory
                     break;
                 case 6:
-                    promptUserToDeleteItem(); // Delete Item
-                    break;
-                case 7:
                     saveInventoryToFile(); // Save inventory to file before exiting
                     exit = true;
                     return;
@@ -835,11 +808,6 @@ public class Item {
                 .max()
                 .orElse(0);
         idCounter.set(maxId);
-
-        // Ensure the counter skips any existing IDs
-        while (inventory.containsKey(String.format("I%04d", idCounter.get()))) {
-            idCounter.incrementAndGet();
-        }
     }
 
     //Add quantity after receiving order
