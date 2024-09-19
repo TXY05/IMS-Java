@@ -135,7 +135,8 @@ public class IMS {
 
             System.out.println("\n\n1. Purchase Order Menu");
             System.out.println("2. Item Menu");
-            System.out.println("3. Logout");
+            System.out.println("3. Goods Receive Menu");
+            System.out.println("4. Logout");
             System.out.print("Enter your choice > ");
             try {
                 choice = scanner.nextInt();
@@ -151,11 +152,13 @@ public class IMS {
                     Item.manageInventory();
                     break;
                 case 3:
+                    GoodsReceive.goodsMenu();
+                case 4:
                     break;
                 default:
                     System.out.println("Input invalid. Please try again.");
             }
-        } while (choice != 3);
+        } while (choice != 4);
     }
 
     public static void line() {
