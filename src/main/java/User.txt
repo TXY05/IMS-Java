@@ -1,2 +1,0 @@
-Admin|admin123@gmail.com|Admin123
-Test|test|test

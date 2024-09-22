@@ -6,12 +6,10 @@ import java.util.Base64;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -245,7 +243,6 @@ public class User extends Person {
     }
 
     public String decryption(String line) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException {
-        String encodedKey;
         SecretKey secretKey = null;
         byte[] decryptedBytes = null;
 

@@ -2,7 +2,6 @@
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.time.DayOfWeek;
 import java.time.LocalTime;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -15,7 +14,6 @@ public class IMS {
 
     public static void main(String[] args) throws FileNotFoundException, IOException {
         Scanner scanner = new Scanner(System.in);
-        boolean endProgram = false;
         int choice = 0;
 
         User user = new User();
@@ -61,7 +59,6 @@ public class IMS {
         item.loadInventoryFromFile();
 
         Map<String, Item> inventory = item.getInventory();
-        ArrayList<String> itemList = new ArrayList<>();
         int totalItem = 0;
         int totalItemQuantity = 0;
         int itemGroup = 0;
@@ -178,7 +175,8 @@ public class IMS {
 
         System.out.println("Day : " + todayDay.substring(0, 1).toUpperCase() + todayDay.substring(1) + "\t\t\t\tDate : " + todayDate + "\t\t\t\tTime : " + todayTime);
     }
-
+    
+    //For console clearing screen function
     public static void clearConsole() {
         try {
             if (System.getProperty("os.name").contains("Windows")) {
