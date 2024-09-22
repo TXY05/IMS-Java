@@ -104,7 +104,7 @@ public class User extends Person {
 
             IMS.dashboard();
         } else {
-            System.out.println("\nRegister Failed! Please try again later!");
+            System.out.println("\nLogin Failed! Please try again later!");
             IMS.systemPause();
 
             return;

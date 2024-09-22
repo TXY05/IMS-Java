@@ -9,6 +9,8 @@
  */
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -66,6 +68,10 @@ public class Supplier extends Person {
 
     public String getId() {
         return id;
+    }
+
+    public void setItemList(ArrayList<String> itemList) {
+        this.itemList = itemList;
     }
 
     public ArrayList<String> getItemList() {
@@ -226,7 +232,7 @@ public class Supplier extends Person {
             i = 1;
 
             System.out.println("\n\n============================================================================================");
-            System.out.printf("ID: %-34s Address: %s", newSupplier.getId(), newSupplier.address.getAddress());
+            System.out.printf("ID: %-34s Address: %s", newSupplier.getId(), newSupplier.address.getAddressLine1());
             System.out.printf("\nName: %-41s %s", newSupplier.getName(), newSupplier.address.getCity());
             System.out.printf("\nEmail: %-40s %s", newSupplier.getEmail(), newSupplier.address.getPostalCode());
             System.out.println("\n============================================================================================");
@@ -355,6 +361,48 @@ public class Supplier extends Person {
         return true;
     }
 
+    public static void SaveSupplierListToFile(ArrayList<Supplier> suppliers) {
+        ArrayList<String> plainText = new ArrayList<>();
+        int i = 0;
+        Supplier sup = new Supplier();
+
+        for (Supplier supplier : suppliers) {
+
+            String supplierID = String.format("S%04d", i + 1);
+            String text = new String(supplierID + "|" + supplier.getName() + "|" + supplier.getEmail() + "|" + supplier.getAddress().getAddressLine1() + "|" + supplier.getAddress().getCity() + "|" + supplier.getAddress().getPostalCode() + "|");
+
+            for (String items : supplier.getItemList()) {
+                text = text + items + ",";
+            }
+            text = text.substring(0, text.length() - 1);
+
+            plainText.add(text);
+            i++;
+        }
+        try {
+            FileOutputStream writer = new FileOutputStream(supplierFile);
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(Supplier.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        for (String line : plainText) {
+            try (BufferedWriter writers = new BufferedWriter(new FileWriter(supplierFile, true))) {
+                String encryptedText = sup.encryption(line);
+                writers.append(encryptedText);
+                writers.newLine();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (NoSuchAlgorithmException ex) {
+                Logger.getLogger(Supplier.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (NoSuchPaddingException ex) {
+                Logger.getLogger(Supplier.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (InvalidKeyException ex) {
+                Logger.getLogger(Supplier.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+        }
+    }
+
     public static String generateSupplierId() {
         String supplierID = String.format("S%04d", supplierCount);
 
@@ -423,6 +471,357 @@ public class Supplier extends Person {
         String plainText = new String(decryptedBytes);
 
         return plainText;
+    }
+
+    public static void editSupplier() {
+        Scanner scanner = new Scanner(System.in);
+        int choice = 0;
+        int supplierChosen = 0;
+        Supplier supplier = new Supplier();
+        ArrayList<Supplier> supplierList = null;
+        do {
+            try {
+                supplierList = supplier.getSupplier();
+            } catch (NoSuchAlgorithmException ex) {
+                Logger.getLogger(Supplier.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (NoSuchPaddingException ex) {
+                Logger.getLogger(Supplier.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (InvalidKeyException ex) {
+                Logger.getLogger(Supplier.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+            IMS.clearConsole();
+            IMS.header();
+            System.out.println("\nSupplier List : ");
+            System.out.printf("%-15s%-15s%-26s%-26s%s", "Supplier ID", "Supplier Name", "Supplier Email", "Supplier Address", "Supplier Stock List\n");
+            for (int i = 0; i < supplierList.size(); i++) {
+                System.out.printf("%d.", i + 1);
+                System.out.printf("%-13s", supplierList.get(i).getId());
+                System.out.printf("%-15s", supplierList.get(i).getName());
+                System.out.printf("%-26s", supplierList.get(i).getEmail());
+                System.out.printf("%-26s", supplierList.get(i).getAddress().getAddressLine1());
+                System.out.printf("%-20s\n", supplierList.get(i).getItemList());
+                System.out.printf("%-56s%s\n", " ", supplierList.get(i).getAddress().getCity());
+                System.out.printf("%-56s%s\n", " ", supplierList.get(i).getAddress().getPostalCode());
+
+            }
+
+            System.out.println("1. Edit Supplier Name");
+            System.out.println("2. Edit Supplier Email");
+            System.out.println("3. Edit Supplier Address");
+            System.out.println("4. Edit Supplier Stock List");
+            System.out.println("5. Back");
+            System.out.print("Enter your choice > ");
+            choice = scanner.nextInt();
+
+            if (choice > 0 && choice < 5) {
+                do {
+                    System.out.print("Select Supplier > ");
+                    try {
+                        supplierChosen = scanner.nextInt();
+                    } catch (InputMismatchException e) {
+                        System.out.println("  Input Error, Please Try Again!!!\n");
+                    }
+                    if (choice > supplierList.size() || choice <= 0) {
+                        System.out.println("  Error: Selection out of range. Please select a number between 1 and " + supplierList.size());
+                    }
+                    scanner.nextLine();
+                } while (choice > supplierList.size() || choice <= 0);
+            }
+
+            switch (choice) {
+                case 1:
+                    editSupplierName(supplierList, supplierChosen);
+                    break;
+                case 2:
+                    editSupplierEmail(supplierList, supplierChosen);
+                    break;
+                case 3:
+                    editSupplierAddress(supplierList, supplierChosen);
+                    break;
+                case 4:
+                    editSupplierStockList(supplierList, supplierChosen);
+                    break;
+                case 5:
+                    return;
+                default:
+                    System.out.println("Invalid choice. Please try again!");
+            }
+
+        } while (choice != 5);
+    }
+
+    public static void editSupplierName(ArrayList<Supplier> supplierList, int supplierChosen) {
+
+        boolean change = false;
+        Scanner scanner = new Scanner(System.in);
+        boolean invalid = false;
+        String name = null;
+
+        do {
+            invalid = false;
+            System.out.print("Enter New Name > ");
+            name = scanner.nextLine();
+
+            if (name.equalsIgnoreCase("e")) {
+                return;
+            } else if (name == null || name.isEmpty()) {
+                invalid = true;
+                System.out.println("Name invalid! Please try again!");
+            }
+        } while (invalid);
+
+        do {
+            invalid = false;
+            System.out.print("Confirm changes? (Y/N) > ");
+            String confirm = scanner.nextLine();
+            if (confirm.equalsIgnoreCase("y")) {
+                change = true;
+            } else if (confirm.equalsIgnoreCase("n")) {
+                invalid = false;
+            } else {
+                System.out.println("Please press Y or N only!");
+                invalid = true;
+            }
+        } while (invalid);
+
+        if (change) {
+            supplierList.get(supplierChosen - 1).setName(name);
+            SaveSupplierListToFile(supplierList);
+
+        }
+        return;
+    }
+
+    public static void editSupplierEmail(ArrayList<Supplier> supplierList, int supplierChosen) {
+        boolean change = false;
+        Scanner scanner = new Scanner(System.in);
+        boolean invalid = false;
+        String email = null;
+        String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\."
+                + "[a-zA-Z0-9_+&*-]+)*@"
+                + "(?:[a-zA-Z0-9-]+\\.)+[a-z"
+                + "A-Z]{2,7}$";
+
+        do {
+            invalid = false;
+            System.out.print("Enter Email > ");
+            email = scanner.nextLine();
+            if (email.equalsIgnoreCase("e")) {
+                return;
+            } else if (email == null || !Pattern.compile(emailRegex).matcher(email).matches() || email.isEmpty()) {
+                invalid = true;
+                System.out.println("Email invalid! Please try again!");
+            }
+        } while (invalid);
+
+        do {
+            invalid = false;
+            System.out.print("Confirm changes? (Y/N) > ");
+            String confirm = scanner.nextLine();
+            if (confirm.equalsIgnoreCase("y")) {
+                change = true;
+            } else if (confirm.equalsIgnoreCase("n")) {
+                invalid = false;
+            } else {
+                System.out.println("Please press Y or N only!");
+                invalid = true;
+            }
+        } while (invalid);
+
+        if (change) {
+            supplierList.get(supplierChosen - 1).setEmail(email);
+            SaveSupplierListToFile(supplierList);
+
+        }
+        return;
+    }
+
+    public static void editSupplierAddress(ArrayList<Supplier> supplierList, int supplierChosen) {
+        boolean change = false;
+        Scanner scanner = new Scanner(System.in);
+        boolean invalid = false;
+        String address1 = null;
+        String city = null;
+        int postalCode = 0;
+        String postalCodeInput = null;
+        String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\."
+                + "[a-zA-Z0-9_+&*-]+)*@"
+                + "(?:[a-zA-Z0-9-]+\\.)+[a-z"
+                + "A-Z]{2,7}$";
+
+        do {
+            invalid = false;
+            System.out.print("Enter New Address Line 1 > ");
+            address1 = scanner.nextLine();
+
+            if (address1.equalsIgnoreCase("e")) {
+                return;
+            } else if (address1 == null || address1.isEmpty()) {
+                invalid = true;
+                System.out.println("Address invalid! Please try again!");
+            }
+        } while (invalid);
+
+        do {
+            invalid = false;
+            System.out.print("Enter New City > ");
+            city = scanner.nextLine();
+
+            if (city.equalsIgnoreCase("e")) {
+                return;
+            } else if (city == null || city.isEmpty()) {
+                invalid = true;
+                System.out.println("City invalid! Please try again!");
+            }
+        } while (invalid);
+
+        do {
+            invalid = false;
+            System.out.print("Enter New Postal Code > ");
+            postalCodeInput = scanner.nextLine();
+            if (postalCodeInput.equalsIgnoreCase("e")) {
+                return;
+            } else if (postalCodeInput == null || postalCodeInput.isEmpty()) {
+                invalid = true;
+                System.out.println("Address is invalid! Please try again!");
+            }
+            try {
+                postalCode = Integer.parseInt(postalCodeInput);
+                // You can add more logic here if needed
+            } catch (NumberFormatException e) {
+                invalid = true;
+                System.out.println("Invalid postal code. Please enter a valid number.");
+            }
+        } while (invalid);
+
+        do {
+            invalid = false;
+            System.out.print("Confirm changes? (Y/N) > ");
+            String confirm = scanner.nextLine();
+            if (confirm.equalsIgnoreCase("y")) {
+                change = true;
+            } else if (confirm.equalsIgnoreCase("n")) {
+                invalid = false;
+            } else {
+                System.out.println("Please press Y or N only!");
+                invalid = true;
+            }
+        } while (invalid);
+
+        Address address = new Address(address1, city, postalCode);
+
+        if (change) {
+            supplierList.get(supplierChosen - 1).setAddress(address);
+            SaveSupplierListToFile(supplierList);
+        }
+        return;
+    }
+
+    private static void editSupplierStockList(ArrayList<Supplier> supplierList, int supplierChosen) {
+        Scanner scanner = new Scanner(System.in);
+        boolean invalid = false;
+        boolean addDone = false;
+        Item item = new Item();
+        int itemSelection = 0;
+        item.loadInventoryFromFile();
+        ArrayList<String> itemIDList = new ArrayList<>();
+        ArrayList<String> itemList = new ArrayList<>();
+        int maxItem = item.getNumberOfItemsAvailable();
+
+        for (String itemString : supplierList.get(supplierChosen - 1).getItemList()) {
+            itemList.add(itemString);
+        }
+
+        Map<String, Item> inventory = item.getInventory();
+
+        for (Item items : inventory.values()) {
+            itemIDList.add(items.getItemId());
+        }
+
+        System.out.printf("%-15s%-15s%-26s%-26s%s", "Supplier ID", "Supplier Name", "Supplier Email", "Supplier Address", "Supplier Stock List\n");
+        System.out.print("1. ");
+        System.out.printf("%-13s", supplierList.get(supplierChosen - 1).getId());
+        System.out.printf("%-15s", supplierList.get(supplierChosen - 1).getName());
+        System.out.printf("%-26s", supplierList.get(supplierChosen - 1).getEmail());
+        System.out.printf("%-26s", supplierList.get(supplierChosen - 1).getAddress().getAddressLine1());
+        System.out.printf("%-20s\n", supplierList.get(supplierChosen - 1).getItemList());
+        System.out.printf("%-57s%s\n", " ", supplierList.get(supplierChosen - 1).getAddress().getCity());
+        System.out.printf("%-57s%s\n", " ", supplierList.get(supplierChosen - 1).getAddress().getPostalCode());
+        do {
+            invalid = false;
+            item.displayAllItems();
+
+            System.out.println("\nEnter \"-1\" to Exit or \"-2\" to Finish");
+            try {
+                System.out.print("Please select the item(s) sold by this suppliers: ");
+                itemSelection = scanner.nextInt();
+                scanner.nextLine();
+                invalid = false;
+            } catch (InputMismatchException e) {
+                System.out.println("Invalid input. Please enter a valid number.");
+            }
+            if (itemSelection == -1) {
+                System.out.println("Cancelled...");
+                return;
+
+            } else if (itemSelection == -2) {
+                addDone = true;
+                break;
+            } else if (itemSelection < 1 || itemSelection > maxItem) {
+                System.out.println("Please choose an option within the range.11\n");
+                scanner.nextLine();
+            } else {
+                do {
+                    invalid = false;
+                    System.out.printf("\n%s selected\n", itemIDList.get(itemSelection - 1));
+                    System.out.print("Press Y to add or N to remove > ");
+                    String confirm = scanner.nextLine();
+                    if (confirm.equalsIgnoreCase("y")) {
+                        if (itemList.contains(itemIDList.get(itemSelection - 1))) {
+                            System.out.println("Item already exists in list");
+                            break;
+                        } else {
+                            itemList.add(itemIDList.get(itemSelection - 1));
+                            System.out.println("Item added");
+                            break;
+                        }
+
+                    } else if (confirm.equalsIgnoreCase("n")) {
+                        itemList.remove(itemIDList.get(itemSelection - 1));
+                        System.out.println("Item removed");
+                        invalid = false;
+                    } else {
+                        System.out.println("Please press Y or N only!");
+                        invalid = true;
+                    }
+                } while (invalid);
+
+                do {
+                    addDone = false;
+                    invalid = false;
+                    System.out.print("Continue add item? (Y/N) > ");
+                    String confirm = scanner.nextLine();
+
+                    if (confirm.equalsIgnoreCase("y")) {
+                        break;
+                    } else if (confirm.equalsIgnoreCase("n")) {
+                        addDone = true;
+                        invalid = false;
+                    } else {
+                        System.out.println("Please press Y or N only!");
+                        invalid = true;
+                    }
+                } while (invalid);
+
+            }
+
+        } while (itemSelection != -1 && !addDone);
+
+        supplierList.get(supplierChosen - 1).setItemList(itemList);
+
+        SaveSupplierListToFile(supplierList);
+
     }
 
 }

@@ -1,18 +1,18 @@
 
 public class Address {
 
-    private String address;
+    private String addressLine1;
     private String city;
     private int postalCode;
 
-    public Address(String address, String city, int postalCode) {
-        this.address = address;
+    public Address(String addressLine1, String city, int postalCode) {
+        this.addressLine1 = addressLine1;
         this.city = city;
         this.postalCode = postalCode;
     }
 
-    public String getAddress() {
-        return address;
+    public String getAddressLine1() {
+        return addressLine1;
     }
 
     public String getCity() {
@@ -23,8 +23,8 @@ public class Address {
         return postalCode;
     }
 
-    public void setAddress(String address) {
-        this.address = address;
+    public void setAddress(String addressLine1) {
+        this.addressLine1 = addressLine1;
     }
 
     public void setCity(String city) {
@@ -37,7 +37,7 @@ public class Address {
 
     @Override
     public String toString() {
-        return address + ", " + city + ", " + postalCode;
+        return addressLine1 + ", " + city + ", " + postalCode;
     }
 
 }

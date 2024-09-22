@@ -119,7 +119,8 @@ public class IMS {
             System.out.println("\n\n1. Purchase Order Menu");
             System.out.println("2. Item Menu");
             System.out.println("3. Goods Receive Menu");
-            System.out.println("4. Logout");
+            System.out.println("4. Supplier Menu");
+            System.out.println("5. Logout");
             System.out.print("Enter your choice > ");
             try {
                 choice = scanner.nextInt();
@@ -136,7 +137,11 @@ public class IMS {
                     break;
                 case 3:
                     GoodsReceive.goodsMenu();
+                    break;
                 case 4:
+                    Supplier.editSupplier();
+                    break;
+                case 5:
                     break;
                 default:
                     System.out.println("Input invalid. Please try again.");

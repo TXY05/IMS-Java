@@ -863,7 +863,7 @@ public class PurchaseOrder {
         System.out.println("\t\t\t\t\t    ======================");
         System.out.println("\n  Vendors : \t\t\t\t\t\t\t\t\t Purchase Order ID: ");
         System.out.printf("  %-30s \t\t\t\t\t\t #%s", supp.getName(), po.getOrderID());
-        System.out.printf("\n  %-20s", supp.getAddress().getAddress());
+        System.out.printf("\n  %-20s", supp.getAddress().getAddressLine1());
         System.out.printf("\n  %-20s          \t\t\t\t\t\t Date: ", supp.getAddress().getCity());
         System.out.printf("\n  %-6d      \t\t\t\t\t\t\t\t\t %s: ", supp.getAddress().getPostalCode(), po.getOrderDate());
         System.out.println("\n\n  ItemID \t Items \t\t\t Quantity \t   Unit Price \t\t Total Price");
