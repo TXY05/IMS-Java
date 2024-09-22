@@ -25,7 +25,7 @@ public class Item {
         this.itemGroup = itemGroup;
         this.minInvLV = minInvLV;
         this.unitPrice = unitPrice;
-        this.itemId = generateItemId();  // Automatically generate ID
+        this.itemId = generateItemId();
         getInventory().put(this.itemId, this);  // Add item to inventory
         itemGroup.addItem(this);  // Add item to group
     }

@@ -13,3 +13,5 @@ I0012,Yogurt,20,Dairy,20,5.0
 I0013,Rice,60,Grains,10,50.0
 I0014,Bread,40,Grains,15,25.0
 I0015,Pasta,35,Grains,20,15.0
+I0016,Sprite,20,Drinks,10,3.0
+I0017,Cola,2,Drinks,10,3.0

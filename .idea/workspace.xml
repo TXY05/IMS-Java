@@ -37,7 +37,7 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
-    "Application.IMS.executor": "Debug",
+    "Application.IMS.executor": "Run",
     "Application.Item.executor": "Run",
     "Application.OrderItem.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
