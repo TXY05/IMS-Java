@@ -511,9 +511,16 @@ public class Supplier extends Person {
             System.out.println("3. Edit Supplier Address");
             System.out.println("4. Edit Supplier Stock List");
             System.out.println("5. Back");
-            System.out.print("Enter your choice > ");
-            choice = scanner.nextInt();
+            do {
+                System.out.print("Enter your choice > ");
+                try {
+                    choice = scanner.nextInt();
+                } catch (InputMismatchException ex) {
+                    System.out.println("  Input Error, Please Try Again!!!\n");
 
+                }
+            } while (choice < 1 || choice > 5);
+            
             if (choice > 0 && choice < 5) {
                 do {
                     System.out.print("Select Supplier > ");
@@ -522,11 +529,11 @@ public class Supplier extends Person {
                     } catch (InputMismatchException e) {
                         System.out.println("  Input Error, Please Try Again!!!\n");
                     }
-                    if (choice > supplierList.size() || choice <= 0) {
+                    if (supplierChosen > supplierList.size() || supplierChosen <= 0) {
                         System.out.println("  Error: Selection out of range. Please select a number between 1 and " + supplierList.size());
                     }
                     scanner.nextLine();
-                } while (choice > supplierList.size() || choice <= 0);
+                } while (supplierChosen > supplierList.size() || supplierChosen <= 0);
             }
 
             switch (choice) {
@@ -560,6 +567,7 @@ public class Supplier extends Person {
 
         do {
             invalid = false;
+            System.out.println("\nPress \"E\" to Exit");
             System.out.print("Enter New Name > ");
             name = scanner.nextLine();
 
@@ -605,6 +613,7 @@ public class Supplier extends Person {
 
         do {
             invalid = false;
+            System.out.println("\nPress \"E\" to Exit");
             System.out.print("Enter Email > ");
             email = scanner.nextLine();
             if (email.equalsIgnoreCase("e")) {
@@ -652,6 +661,7 @@ public class Supplier extends Person {
 
         do {
             invalid = false;
+            System.out.println("\nPress \"E\" to Exit");
             System.out.print("Enter New Address Line 1 > ");
             address1 = scanner.nextLine();
 
@@ -665,6 +675,7 @@ public class Supplier extends Person {
 
         do {
             invalid = false;
+            System.out.println("\nPress \"E\" to Exit");
             System.out.print("Enter New City > ");
             city = scanner.nextLine();
 
@@ -678,6 +689,7 @@ public class Supplier extends Person {
 
         do {
             invalid = false;
+            System.out.println("\nPress \"E\" to Exit");
             System.out.print("Enter New Postal Code > ");
             postalCodeInput = scanner.nextLine();
             if (postalCodeInput.equalsIgnoreCase("e")) {
