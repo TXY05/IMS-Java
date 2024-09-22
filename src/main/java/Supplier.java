@@ -543,7 +543,7 @@ public class Supplier extends Person {
                     editSupplierStockList(supplierList, supplierChosen);
                     break;
                 case 5:
-                    return;
+                    break;
                 default:
                     System.out.println("Invalid choice. Please try again!");
             }

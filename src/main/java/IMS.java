@@ -142,11 +142,11 @@ public class IMS {
                     Supplier.editSupplier();
                     break;
                 case 5:
-                    break;
+                    return;
                 default:
                     System.out.println("Input invalid. Please try again.");
             }
-        } while (choice != 4);
+        } while (choice != 5);
     }
 
     public static void line() {
