@@ -705,11 +705,9 @@ public class Item {
         while (!exit) {
             System.out.println("\nInventory Management System");
             System.out.println("1. Add New Item");
-            System.out.println("2. Edit Item Quantity");
-            System.out.println("3. Edit Item Details");
-            System.out.println("4. Edit Min Stock Level");
-            System.out.println("5. Display Inventory");
-            System.out.println("6. Exit");
+            System.out.println("2. Edit Item Details");
+            System.out.println("3. Display Inventory");
+            System.out.println("4. Exit");
             System.out.print("Choose an option: ");
 
             String choiceInput = scanner.nextLine();
@@ -724,18 +722,12 @@ public class Item {
                     promptUserToAddNewItem(); // Add New Item
                     break;
                 case 2:
-                    promptUserToEditItemQuantity(); // Edit Item Quantity
-                    break;
-                case 3:
                     promptUserToEditItemDetails(); // Edit Item Details
                     break;
-                case 4:
-                    promptUserToEditMinStockLevel(); // Edit Min Stock Level
-                    break;
-                case 5:
+                case 3:
                     displayInventory(); // Display inventory
                     break;
-                case 6:
+                case 4:
                     saveInventoryToFile(); // Save inventory to file before exiting
                     exit = true;
                     return;
