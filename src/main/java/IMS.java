@@ -37,27 +37,10 @@ public class IMS {
 
             switch (choice) {
                 case 1:
-                    endProgram = user.login();
-                    if (!endProgram) {
-                        System.out.println("\nLogin Failed! Please try again later!");
-                        systemPause();
-                    } else {
-                        System.out.println("\nLogin Success!");
-                        systemPause();
-                        dashboard();
-                    }
+                    user.login();
                     break;
                 case 2:
-                    endProgram = user.signup();
-                    if (!endProgram) {
-                        System.out.println("\nRegister Failed! Please try again later!");
-                        System.out.println("Press Enter to Continue...");
-                        scanner.nextLine();
-                        scanner.nextLine();
-                    } else {
-                        System.out.println("\nRegister Success!");
-                        systemPause();
-                    }
+                    user.signup();
                     break;
                 case 3:
                     System.out.println("Program exitting...");

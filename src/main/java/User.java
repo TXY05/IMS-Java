@@ -20,9 +20,6 @@ public class User extends Person {
 
     private static String userFile = "User.txt";
     private String password;
-    private BufferedReader reader = null;
-    private String line = "";
-    private Scanner scanner = new Scanner(System.in);
 
     public User() {
 
@@ -45,7 +42,11 @@ public class User extends Person {
         this.password = password;
     }
 
-    public boolean login() {
+    public static void login() {
+        Scanner scanner = new Scanner(System.in);
+        boolean login = false;
+        BufferedReader reader = null;
+        String line = null;
         boolean invalid = false;
         String email;
         String password;
@@ -63,7 +64,7 @@ public class User extends Person {
             System.out.print("Enter Email > ");
             email = scanner.nextLine();
             if (email.equalsIgnoreCase("e")) {
-                return false;
+                return;
             } else if (email == null || !Pattern.compile(emailRegex).matcher(email).matches()) {
                 invalid = true;
                 System.out.println("Email invalid! Please try again!");
@@ -73,7 +74,7 @@ public class User extends Person {
         System.out.print("Enter Password > ");
         password = scanner.nextLine();
         if (password.equalsIgnoreCase("e")) {
-            return false;
+            return;
         }
 
         User user = new User();
@@ -85,7 +86,9 @@ public class User extends Person {
                 String[] row = decryptedText.split("[|]");
 
                 if (email.compareTo(row[1]) == 0 && password.compareTo(row[2]) == 0) {
-                    return true;
+                    System.out.println("\nlogin Success!");
+                    IMS.systemPause();
+                    login = true;
                 }
             }
         } catch (Exception e) {
@@ -99,10 +102,22 @@ public class User extends Person {
             }
         }
 
-        return false;
+        if (login) {
+
+            IMS.dashboard();
+        } else {
+            System.out.println("\nRegister Failed! Please try again later!");
+            IMS.systemPause();
+
+            return;
+        }
     }
 
-    public boolean signup() {
+    public static void signup() {
+        Scanner scanner = new Scanner(System.in);
+
+        BufferedReader reader = null;
+        String line = null;
         boolean invalid = false;
         String name = null;
         String email = null;
@@ -122,7 +137,7 @@ public class User extends Person {
             name = scanner.nextLine();
 
             if (name.equalsIgnoreCase("e")) {
-                return false;
+                return;
             } else if (name == null || name.isEmpty()) {
                 invalid = true;
                 System.out.println("Name invalid! Please try again!");
@@ -134,7 +149,7 @@ public class User extends Person {
             System.out.print("Enter Email > ");
             email = scanner.nextLine();
             if (email.equalsIgnoreCase("e")) {
-                return false;
+                return;
             } else if (email == null || !Pattern.compile(emailRegex).matcher(email).matches() || email.isEmpty()) {
                 invalid = true;
                 System.out.println("Email invalid! Please try again!");
@@ -146,7 +161,7 @@ public class User extends Person {
             System.out.print("Enter Password > ");
             password = scanner.nextLine();
             if (password.equalsIgnoreCase("e")) {
-                return false;
+                return;
             } else if (password == null || password.length() < 8 || password.isEmpty()) {
                 invalid = true;
                 System.out.println("Password is invalid! A minimum length of 8 characters is required!");
@@ -161,8 +176,11 @@ public class User extends Person {
                 String decodedText = user.decryption(line);
                 String[] row = decodedText.split("[|]");
                 if (email.compareTo(row[1]) == 0) {
-                    System.out.println("Email repeated! Please try again!");
-                    return false;
+                    System.out.println("Email repeated!");
+
+                    System.out.println("\nRegister Failed! Please try again later!");
+                    IMS.systemPause();
+                    return;
                 }
             }
         } catch (Exception e) {
@@ -189,7 +207,11 @@ public class User extends Person {
         } catch (InvalidKeyException ex) {
             Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
         }
-        return true;
+
+        System.out.println("\nRegister Success!");
+        IMS.systemPause();
+
+        return;
     }
 
     public String encryption(String line) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException {
