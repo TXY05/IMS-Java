@@ -812,7 +812,7 @@ public class Item {
 
     //Add quantity after receiving order
     public static void addItemQty(String restockID, int restockQty){
-        ArrayList<Item> tempItem = GoodsReceive.readAndSaveItem("items.txt");
+        ArrayList<Item> tempItem = GoodsReceive.readItemIntoArray("items.txt");
         int index = 0;
         for (Item item : tempItem){
             if (restockID.equals(item.getItemId())) {

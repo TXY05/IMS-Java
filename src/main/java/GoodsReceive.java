@@ -226,7 +226,7 @@ public class GoodsReceive {
     }
 
     //Read and get Item Array List
-    public static ArrayList<Item> readAndSaveItem(String filename) {
+    public static ArrayList<Item> readItemIntoArray(String filename) {
         ArrayList<Item> itemList = new ArrayList<>();
         String fileName = "items.txt";
         try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {

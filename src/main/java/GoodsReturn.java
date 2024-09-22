@@ -160,7 +160,7 @@ public class GoodsReturn {
     }
 
     //Save Goods Return Into Goods Return File
-    public static void saveGoodsReturnToFile(PurchaseOrder goodsReturn, int returnQty[]) {
+    private static void saveGoodsReturnToFile(PurchaseOrder goodsReturn, int returnQty[]) {
         String orderID = goodsReturn.getOrderID();
         int itemCount = goodsReturn.getItemCount();
         int itemLoop = 0;
