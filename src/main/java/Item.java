@@ -170,33 +170,6 @@ public class Item {
         initializeIdCounter();  // Initialize ID counter
     }
 
-    public static void promptUserToEditItemQuantity() {
-        Scanner scanner = new Scanner(System.in);
-
-        System.out.println("\nPress 'e' to exit at any time.");
-        System.out.print("\nEnter the item ID: ");
-        String itemId = scanner.nextLine();
-        if (itemId.equalsIgnoreCase("e")) return;
-
-        if (getInventory().containsKey(itemId)) {
-            Item item = getInventory().get(itemId);
-            System.out.print("Enter the new quantity for item " + item.getItemName() + ": ");
-            String quantityInput = scanner.nextLine();
-            if (quantityInput.equalsIgnoreCase("e")) return;
-            while (!isValidItemQuantity(quantityInput)) {
-                System.out.println("Invalid quantity. Please enter a positive integer between 0 and 100.");
-                quantityInput = scanner.nextLine();
-                if (quantityInput.equalsIgnoreCase("e")) return;
-            }
-            int newQuantity = Integer.parseInt(quantityInput);
-            item.setItemQuantity(newQuantity);
-            System.out.println("New quantity of " + item.getItemName() + ": " + item.getItemQuantity());
-            saveInventoryToFile();  // Save changes to file
-        } else {
-            System.out.println("Item ID not found in inventory.");
-        }
-    }
-
     public static void promptUserToEditItemDetails() {
         Scanner scanner = new Scanner(System.in);
 
@@ -238,6 +211,7 @@ public class Item {
                         if (newName.equalsIgnoreCase("e")) return;
                         while (newName.isEmpty()) {
                             System.out.println("Item name cannot be empty. Please enter a valid item name.");
+                            System.out.print("Enter new name: ");
                             newName = scanner.nextLine();
                             if (newName.equalsIgnoreCase("e")) return;
                         }
@@ -249,6 +223,7 @@ public class Item {
                         if (quantityInput.equalsIgnoreCase("e")) return;
                         while (!isValidItemQuantity(quantityInput)) {
                             System.out.println("Invalid quantity. Please enter a positive integer between 0 and 100.");
+                            System.out.print("Enter new quantity: ");
                             quantityInput = scanner.nextLine();
                             if (quantityInput.equalsIgnoreCase("e")) return;
                         }
@@ -286,6 +261,7 @@ public class Item {
                             if (groupName.equalsIgnoreCase("e")) return;
                             while (groupName.isEmpty()) {
                                 System.out.println("Group name cannot be empty. Please enter a valid group name.");
+                                System.out.print("Enter the new group name: ");
                                 groupName = scanner.nextLine();
                                 if (groupName.equalsIgnoreCase("e")) return;
                             }
@@ -300,6 +276,7 @@ public class Item {
                         if (minStockInput.equalsIgnoreCase("e")) return;
                         while (!isValidMinStockLevel(minStockInput)) {
                             System.out.println("Invalid minimum stock level. Please enter an integer between 1 and 100.");
+                            System.out.print("Enter new minimum stock level: ");
                             minStockInput = scanner.nextLine();
                             if (minStockInput.equalsIgnoreCase("e")) return;
                         }
@@ -312,6 +289,7 @@ public class Item {
                         if (priceInput.equalsIgnoreCase("e")) return;
                         while (priceInput.isEmpty() || !isValidUnitPrice(priceInput)) {
                             System.out.println("Invalid unit price. Please enter a value between 1 and 1000.");
+                            System.out.print("Enter new unit price: ");
                             priceInput = scanner.nextLine();
                             if (priceInput.equalsIgnoreCase("e")) return;
                         }
@@ -663,35 +641,6 @@ public class Item {
             }
             saveInventoryToFile();  // Save changes to file
             removeEmptyGroups();  // Remove empty groups
-        }
-    }
-
-
-    public static void promptUserToEditMinStockLevel() {
-        Scanner scanner = new Scanner(System.in);
-
-        System.out.print("\nPress 'e' to exit at any time.");
-        System.out.print("\nEnter the item ID: ");
-        String itemId = scanner.nextLine();
-        if (itemId.equalsIgnoreCase("e")) return;
-
-        Item item = getInventory().get(itemId);
-        if (item != null) {
-            System.out.println("Current minimum stock level for " + item.getItemName() + ": " + item.getMinInvLV());
-            System.out.print("Enter the new minimum stock level (1-100): ");
-            String minStockInput = scanner.nextLine();
-            if (minStockInput.equalsIgnoreCase("e")) return;
-            while (!isValidMinStockLevel(minStockInput)) {
-                System.out.println("Invalid minimum stock level. Please enter an integer between 1 and 100.");
-                minStockInput = scanner.nextLine();
-                if (minStockInput.equalsIgnoreCase("e")) return;
-            }
-            int newMinInvLV = Integer.parseInt(minStockInput);
-            item.setMinInvLV(newMinInvLV);
-            System.out.println("New minimum stock level for " + item.getItemName() + ": " + item.getMinInvLV());
-            saveInventoryToFile();  // Save changes to file
-        } else {
-            System.out.println("Item ID not found in inventory.");
         }
     }
 
