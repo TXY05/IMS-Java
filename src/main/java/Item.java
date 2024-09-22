@@ -488,12 +488,16 @@ public class Item {
     }
 
     public static void displayAllItems() {
+        double totalInvValue = 0;
+        
         System.out.println("\nCurrent Inventory:");
         System.out.printf("%-10s | %-20s | %-10s | %-15s | %-10s | %-10s%n", "ID", "Name", "Quantity", "Category", "Min Stock", "Unit Price");
         System.out.println("------------------------------------------------------------------------------------------");
         for (Item item : getInventory().values()) {
             System.out.printf("%-10s | %-20s | %-10d | %-15s | %-10d | %-10.2f%n", item.getItemId(), item.getItemName(), item.getItemQuantity(), item.getItemGroup().getGroupName(), item.getMinInvLV(), item.getUnitPrice());
+            totalInvValue += (item.getItemQuantity() * item.getUnitPrice());
         }
+        System.out.printf("Total Inventory Value: RM%.2f\n", totalInvValue);
     }
 
     private static void displayItemsByGroup(Scanner scanner) {

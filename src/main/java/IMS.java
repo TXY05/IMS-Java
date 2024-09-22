@@ -68,6 +68,7 @@ public class IMS {
         float totalCost = 0;
         int quantityToReceive = 0;
         ArrayList<String> itemGroups = new ArrayList<>();
+        double totalInvValue = 0;
 
         for (Item items : inventory.values()) {
             if (items.getItemQuantity() < items.getMinInvLV()) {
@@ -79,6 +80,7 @@ public class IMS {
                 itemGroup++;
             }
             totalItemQuantity += items.getItemQuantity();
+            totalInvValue += (items.getItemQuantity() * items.getUnitPrice());
             totalItem++;
         }
 
@@ -106,7 +108,8 @@ public class IMS {
             System.out.printf("Quantity to be RECEIVED   %-14d", quantityToReceive);
             System.out.printf("Total Cost          RM%-18.2f\n", totalCost);
 
-            System.out.printf("All Items           %-15d\n\n", totalItem);
+            System.out.printf("All Items           %-15d", totalItem);
+            System.out.printf("Total Inventory Value     RM%-12.2f\n\n", totalInvValue);
 
             System.out.println("Low Stock Items List :");
             for (int i = 0; i < lowStockItem.size(); i++) {
