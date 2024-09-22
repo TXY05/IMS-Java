@@ -126,7 +126,7 @@ public class IMS {
             System.out.printf("Quantity to be RECEIVED   %-14d", quantityToReceive);
             System.out.printf("Total Cost          RM%-18.2f\n", totalCost);
 
-            System.out.printf("Ail Items           %-15d\n\n", totalItem);
+            System.out.printf("All Items           %-15d\n\n", totalItem);
 
             System.out.println("Low Stock Items List :");
             for (int i = 0; i < lowStockItem.size(); i++) {
